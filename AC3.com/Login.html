@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+ <html>
+     <head>
+      <title>AC3 Login</title>
+      <link rel="SHORTCUT ICON" href="images/AC3-logo.ico">
+      <link rel="Stylesheet" type="text/css" href="style1.css"/>
+      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+      <script type="text/javascript" src="Login.js"></script>
+     </head>
+     <Center>
+         <body>
+         <img src="images/AC3-logo.png" align="center" style="width:304px;height:228px">
+          <h1>Welcome to AC3 Home Security Management</h1>
+              <div>
+                  <span>User Name:</span>
+                  <span><input type="text" autocomplete="off" name="username" /></span>
+              </div>
+              <div>
+                  <span>User Password:</span>
+                  <span><input type="text" autocomplete="off" name="userpassword" /></span>
+              </div>
+              <a href="#" id="f_link">Forgot Password</a>
+              <div>
+                  <button>Login</button>
+              </div>
+              <div class="hfields" style="display: none">
+                  <div><Font color="blue"><span>Send Password to a Registered Email</span></Font></div>
+                  <div>
+                  <span>Email: </span>
+                  <span><input id="email" type="text" autocomplete="off" name="email" /></span>
+                  </div>
+                  <div><button id="send">Send Email</button></div>
+                  <Font color="red"><span id="error" style="display: none">Please Enter Valid Email</span></Font>
+              </div>
+         </body>
+     </Center>
+ </html>
