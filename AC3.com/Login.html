@@ -11,14 +11,17 @@
          <body>
          <img src="images/AC3-logo.png" align="center" style="width:304px;height:228px">
           <h1>Welcome to AC3 Home Security Management</h1>
-              <div>
-                  <span>User Name:</span>
-                  <span><input type="text" autocomplete="off" name="username" /></span>
-              </div>
-              <div>
-                  <span>User Password:</span>
-                  <span><input type="text" autocomplete="off" name="userpassword" /></span>
-              </div>
+		  <table style="border:solid 4px;padding:5px " align="center">
+		  <tbody>
+              <tr>
+                <td width="50%">User Name:</td>
+                <td style="border: solid 1px"><input type="text" autocomplete="off" name="username" /></td>
+              </tr>
+				  <td width="50%">User Password:</td>
+				  <td style="border: solid 1px"><input type="text" autocomplete="off" name="userpassword" /></td>
+              </tr>
+		  </tbody>
+		  </table>
               <a href="#" id="f_link">Forgot Password</a>
               <div>
                   <button>Login</button>
@@ -27,9 +30,9 @@
                   <div><Font color="blue"><span>Send Password to a Registered Email</span></Font></div>
                   <div>
                   <span>Email: </span>
-                  <span><input id="email" type="text" autocomplete="off" name="email" /></span>
+                  <span style="border: input 1px"><input id="email" type="text" autocomplete="off" name="email" /></span>
                   </div>
-                  <div><button id="send">Send Email</button></div>
+                  <div><a href="file:///C:/Users/chance.williams/Desktop/HomeSec/HomeSecurityProject/AC3.com/MainView.html"><button id="send">Send Email</button></a></div>
                   <Font color="red"><span id="error" style="display: none">Please Enter Valid Email</span></Font>
               </div>
          </body>
