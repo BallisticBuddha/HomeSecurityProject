@@ -8,10 +8,10 @@ $(document).ready(function(){
 	if(!isValidEmailAddress(email))
 	{
 		$("#error").show();
+		return false;
 	}
 	else
 		$("#error").hide();
-	return false;
   });
 });
 
