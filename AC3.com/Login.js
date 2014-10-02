@@ -12,6 +12,7 @@ $(document).ready(function(){
 	}
 	else
 		$("#error").hide();
+		$("#emailconf").show();
   });
 });
 
