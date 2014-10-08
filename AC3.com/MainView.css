@@ -4,3 +4,29 @@
     outline-color: #0033CC;
 	background-color: #0099CC
 }
+
+.events{
+	display: block;
+	height: 600px; 
+	float: left;
+	width: 500px; 
+	font-size: 12px; 
+	overflow: auto;
+}
+.middle{
+	display: block;
+	height: 600px; 
+	float: left;
+	width: 850px; 
+	font-size: 12px; 
+	overflow: auto;
+}
+
+.graphs{
+	display: block;
+	height: 600px; 
+	width: 500px; 
+	font-size: 12px; 
+	overflow: auto;
+	float: right;
+}
