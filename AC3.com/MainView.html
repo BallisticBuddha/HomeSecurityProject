@@ -5,21 +5,25 @@
       <link rel="SHORTCUT ICON" href="images/AC3-logo.ico">
 	  <link rel="stylesheet" type="text/css" href="MainView.css">
       <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	  <link rel="stylesheet" href="UI/jquery-ui.css">
+	  <script src="UI/jquery-1.10.2.js"></script>
+	  <script src="UI/jquery-ui.js"></script>
+	  <link rel="stylesheet" href="UI/style.css">
       <script type="text/javascript" src="MainView.js"></script>
 </head>
 <table class="header" width="100%">
 <tr>
 <td><img src="images/AC3-logo.png" align="left" style="width:100px;height:100px"></td>
 <td align="center"><font size="8"><bold>Welcome User1</bold></font></td>
-<td align="right"><button>Edit Profile</button><button>Logout</button></td>
+<td align="center"><button>Edit Profile</button><button>Logout</button></td>
 </tr>
 </table>
 <body>
 <center>
 <div>
-<table class="events" border="5px">
+<table bgcolor="#EEC966" class="events" border="5px">
 <caption><bold><font size="5" color="blue">Events List</font></bold></caption>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><th>Hello</a></th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th></tr>
 <tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
 <tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
 <tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
@@ -59,15 +63,29 @@
 <tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
 <tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
 </table>
-<div class="middle" border="5px">
+<div class="filter" border="5px">
 <caption><font size="5" color="blue"><bold>Filter Events</bold></font></caption>
-<div>
-<button>Filter</label>
+<form action="#">
+UserName: <input type="text" name="FirstName"><br>
+Date1: <input type="text" id="date1">
+<label style="margin-left:25px;margin-right:25px">To</label>	
+Date2: <input type="text" id="date2"><br>
+<label for="Sensor">Triggered Sensor</label>
+<select name="sensor" id="sensor">
+  <option selected="selected">1</option>
+  <option>2</option>
+  <option>3</option>
+  <option>4</option>
+  <option>5</option>
+</select>
+<label style="margin-left:25px" for="Sensor">Deactivated</label>
+<select name="deactivated" id="deactivated">
+  <option selected="selected">NO</option>
+  <option>YES</option>
+</select><br>
+<input type="submit" value="Filter"><br>
+</form>
 </div>
-</div>
-<table class="graphs" border="5px">
-<caption><font size="5" color="blue"><bold>Graphs</bold></font></caption>
-</table>
 </div>
 </center>
 </body>
