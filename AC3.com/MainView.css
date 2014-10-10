@@ -5,24 +5,43 @@
 	background-color: white;
 }
 
+.charts{
+	border: 6px solid black;
+	width: 400px;
+	height: 300px;
+	margin-left: 25%;
+	margin-top: 1%;
+}
+
 .events{
 	display: block;
 	height: 450px; 
 	float: left;
-	width: 530px;
+	width: 400px;
 	margin-top: .1%;
 	font-size: 12px; 
 	overflow: auto;
 	border-collapse: collapse;
+	border: 4px solid black;
 }
 
 .filter{
-	margin-top: 1%;
 	border: 4px solid black;
 	background-color: white;
+	margin-top: 1%;
 }
 
+.jqplot-title{
+	color: black;
+	font-weight: bold;
+}
+
+/* EVERYTHING BELOW WILL CHANGE */
 table, th {
     border: 1px solid black;
 	font-size: 140%;
+}
+
+th{
+	background-color: #907F68;
 }

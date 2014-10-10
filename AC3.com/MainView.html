@@ -4,7 +4,10 @@
     <title>AC3 Main View</title>
       <link rel="SHORTCUT ICON" href="Images/AC3-logo.ico">
 	  <link rel="stylesheet" type="text/css" href="MainView.css">
-      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+      <script src="jqplot/jquery.min.js"></script>
+	  <script src="jqplot/jquery.jqplot.min.js"></script>
+      <script src="jqplot/jqplot.pieRenderer.min.js"></script>
+      <link href="jqplot/jquery.jqplot.min.css" type="text/css" rel="stylesheet"/>
 	  <link rel="stylesheet" href="UI/jquery-ui.css">
 	  <script src="UI/jquery-1.10.2.js"></script>
 	  <script src="UI/jquery-ui.js"></script>
@@ -24,45 +27,31 @@
 <div>
 <table bgcolor="#EEC966" class="events" border="5px">
 <caption><bold><font size="5" color="blue">Events List</font></bold></caption>
-<tr><th>Hello</a></th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th><th>Hello</th></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
-<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><th>ID</a></th><th>Event Type</th><th>Date</th><th>Time</th><th>Picture</th><th>UserID</th><th>Sensor Triggered</th></tr>
+<tr><td>Hello</td><td>Hello</td><td>hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
+<tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
 </table>
 <div class="filter" border="5px">
 <caption><font size="5" color="blue"><bold>Filter Events</bold></font></caption><br>
@@ -85,6 +74,8 @@ Date2: <img src="Images/calendar.ico" style="width:30px;height:30px;vertical-ali
 </select><br>
 <input type="submit" value="Filter"><br>
 </div>
+</div>
+<div class="charts" id="eventactors">
 </div>
 </center>
 </form>
