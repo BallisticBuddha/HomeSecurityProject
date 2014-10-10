@@ -19,6 +19,7 @@
 </tr>
 </table>
 <body bgcolor='#3488C4'>
+<form action="#">
 <center>
 <div>
 <table bgcolor="#EEC966" class="events" border="5px">
@@ -64,12 +65,11 @@
 <tr><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>
 </table>
 <div class="filter" border="5px">
-<caption><font size="5" color="blue"><bold>Filter Events</bold></font></caption>
-<form action="#">
+<caption><font size="5" color="blue"><bold>Filter Events</bold></font></caption><br>
 UserName: <input type="text" name="FirstName"><br>
-Date1: <img src="Images/calendar.ico" style="width:30px;height:30px;vertical-align: text-bottom"><input autocomplete="off" type="text" id="date1">
+Date1: <img src="Images/calendar.ico" style="width:30px;height:30px;vertical-align: text-bottom"><input autocomplete="off" type="text" id="date1" name="date1">
 <label style="margin-left:25px;margin-right:25px">To</label>	
-Date2: <img src="Images/calendar.ico" style="width:30px;height:30px;vertical-align: text-bottom"><input autocomplete="off" type="text" id="date2"><br>
+Date2: <img src="Images/calendar.ico" style="width:30px;height:30px;vertical-align: text-bottom"><input autocomplete="off" type="text" id="date2" name="date2"><br>
 <label for="Sensor">Triggered Sensor</label>
 <select name="sensor" id="sensor">
   <option selected="selected">1</option>
@@ -84,9 +84,9 @@ Date2: <img src="Images/calendar.ico" style="width:30px;height:30px;vertical-ali
   <option>YES</option>
 </select><br>
 <input type="submit" value="Filter"><br>
-</form>
 </div>
 </div>
 </center>
+</form>
 </body>
 </html>

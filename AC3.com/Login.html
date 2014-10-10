@@ -8,6 +8,7 @@
       <script type="text/javascript" src="Login.js"></script>
      </head>
      <Center>
+		<form action="#">
          <body bgcolor='#3488C4'>
 		<div class="login">
          <img src="Images/AC3-logo.png" align="center" style="width:304px;height:228px">
@@ -25,7 +26,7 @@
 		  </table>
               <a href="#" id="f_link">Forgot Password</a>
               <div>
-                  <button>Login</button>
+                  <input type="submit" id="blogin" value="Login" />
               </div>
               <div class="hfields" style="display: none">
                   <div><Font color="blue"><span>Send Password to a Registered Email</span></Font></div>
@@ -33,11 +34,12 @@
                   <span>Email: </span>
                   <span style="border: input 1px"><input id="email" type="text" autocomplete="off" name="email" /></span>
                   </div>
-                  <div><button id="send">Send Email</button></div>
+                  <div><input type="submit" id="bsendemail" value="Send Email" /></div>
                   <Font color="red"><span id="error" style="display: none">Please Enter Valid Email</span></Font>
 				  <Font color="blue"><span id="emailconf" style="display: none">Your Password Has Been Sent To Your Email</span></Font>
               </div>
 		</div>
          </body>
+		</form>
      </Center>
  </html>
