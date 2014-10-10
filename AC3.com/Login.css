@@ -1,4 +1,8 @@
 .login{
+	border: 6px solid black;
+	outline-style: groove;
+	outline-color: #0033CC;
+	outline-width: 10px;
 	display: block;
 	height: 540px; 
 	width: 400px;
