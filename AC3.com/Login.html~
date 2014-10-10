@@ -2,7 +2,7 @@
  <html>
      <head>
       <title>AC3 Login</title>
-      <link rel="SHORTCUT ICON" href="Images/AC3-logo.ico">
+      <link rel="SHORTCUT ICON" href="images/AC3-logo.ico">
 	  <link rel="stylesheet" type="text/css" href="Login.css">
       <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
       <script type="text/javascript" src="Login.js"></script>

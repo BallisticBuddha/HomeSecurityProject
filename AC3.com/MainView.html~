@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     <title>AC3 Main View</title>
-      <link rel="SHORTCUT ICON" href="Images/AC3-logo.ico">
+      <link rel="SHORTCUT ICON" href="images/AC3-logo.ico">
 	  <link rel="stylesheet" type="text/css" href="MainView.css">
       <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 	  <link rel="stylesheet" href="UI/jquery-ui.css">
@@ -13,7 +13,7 @@
 </head>
 <table class="header" width="100%">
 <tr>
-<td><img src="Images/AC3-logo.png" align="left" style="width:100px;height:100px"></td>
+<td><img src="images/AC3-logo.png" align="left" style="width:100px;height:100px"></td>
 <td align="center"><font size="8"><bold>Welcome User1</bold></font></td>
 <td align="center"><button>Edit Profile</button><button>Logout</button></td>
 </tr>
