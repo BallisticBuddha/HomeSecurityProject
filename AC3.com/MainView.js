@@ -12,8 +12,8 @@ $(function() {
  
  $(document).ready(function(){
 var data = [
-    ['User1', 75],['User2', 15],['User3', 30], 
-    ['User4', 43],['User5', 42]
+    ['Alex', 75],['Chris1', 65],['Chris2', 30], 
+    ['Chance', 43]
   ];
   var plot1 = jQuery.jqplot ('eventactors', [data], 
     { 
