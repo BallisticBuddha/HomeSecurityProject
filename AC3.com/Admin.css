@@ -26,15 +26,15 @@
 	outline-color: #0033CC;
 	height: 400px; 
 	width: 50%;
-	font-size: 145%;
+	font-size: 90%;
 	background-color: white;
 	
 }
 
-.edit{
+.edit, .sedit{
 	display: none;
 }
 
-.info{
+.info, .sinfo{
 	color: green;
 }
