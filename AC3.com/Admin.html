@@ -3,10 +3,70 @@
 <head lang="en">
    <title>AC3 Admin</title>
       <link rel="SHORTCUT ICON" href="images/AC3-logo.ico">
-      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	  <link rel="stylesheet" type="text/css" href="Admin.css">
+	  <link rel="stylesheet" href="UI/style.css">
+	  <link rel="stylesheet" href="UI/jquery-ui.css">
+      <script src="jqplot/jquery.min.js"></script>
+	  <script src="UI/jquery-ui.js"></script>
       <script type="text/javascript" src="Admin.js"></script>
 </head>
-<body>
-
+<table class="header" width="100%">
+<tr>
+<td><img src="Images/AC3-logo.png" align="left" style="width:100px;height:100px"></td>
+<td align="center"><font size="8"><bold>Administrator Panel</bold></font></td>
+<td align="center"><input id="Main" type="submit" value="MainView" /><input id="Logout" type="submit" value="Logout" /></td>
+</tr>
+</table>
+<body bgcolor='#3488C4'>
+<Center>
+<div class="body" style="display: table;">
+    <div class="profile" style="display: table-row">
+	<div style="display: table-cell">
+		<table>
+		<caption><bold><font size="5" color="blue">Users Information</font></bold></caption>
+		<tr><td><div>
+			User ID: </td><td>
+			<select name="Users" id="Users">
+			<option selected="selected">Administrator</option>
+			<option>New User</option>
+			<option>Chris1</option>
+			<option>Chris2</option>
+			<option>Alex</option>
+			</select>
+		</div></td></tr>
+		<tr><td><div>Privilege Level: </td><td><label class="info">Top Secret</label><input class="edit" type="text" name="security"/></div></td></tr>
+		<tr><td><div>First name: </td><td><label class="info">Firstname1</label><input class="edit" type="text" name="firstname"/></div></td></tr>
+		<tr><td><div>Last name: </td><td><label class="info">Lastname1</label><input class="edit" type="text" name="lastname"/></div></td></tr>
+		<tr><td><div>User name: </td><td><label class="info">Uesr 1</label><input class="edit" type="text" name="username"/></div></td></tr>
+		<tr><td><div>Password: </td><td><label class="info">Password1</label><input class="edit" type="text" name="password"/></div></td></tr>
+		<tr><td><div>Email: </td><td><label class="info">Email1</label><input class="edit" type="text" name="email"/></div></td></tr>
+		<tr><td><div>Phone Number: </td><td><label class="info">77635124554</label><input class="edit" type="text" name="phonenumber"/></div></td></tr>
+		</table>
+		<div style="margin-top: 5%">
+		<input id="bEdit" type="submit" value="Edit"/>
+		<input type="submit" value="Save Changes"/>
+		<input type="submit" value="Delete User"/>
+		</div>
+	</div>
+	<div class="sensorinfo" style="display: table-cell">
+		<table>
+			<caption><bold><font size="5" color="blue">Sensor Information</font></bold></caption>
+			<tr><td>
+			Sensor #: </td>
+			<td><select name="sensors" id="sensors">
+			<option selected="selected">Sensor 1</option>
+			<option>Sensor 2</option>
+			<option>Sensor 3</option>
+			<option>Sensor 4</option>
+			<option>Sensor 5</option></select></td></tr>
+			<tr><td>Sensor Name: </td><td><label class="sinfo">Kitchen</label><input type="text" class="sedit"/><td></tr>
+			<tr><td>Description: </td></tr>
+			<tr><td><textarea rows="4" cols="50"></textarea><td></tr>
+		</table>
+		<div style="margin-top: 22%"><input type="submit" value="Save Changes"/><input type="submit" value="Delete Sensor"/></div>
+	</div>
+	</div>
+</div>
+</Center>
 </body>
 </html>

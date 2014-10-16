@@ -3,7 +3,7 @@ $(document).ready(function(){
     $(".hfields").toggle();
   });
   
-  $("#send").click(function(){
+  $("#bsendemail").click(function(){
 	var email = $("#email").val();
 	if(!isValidEmailAddress(email))
 	{

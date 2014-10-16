@@ -1,0 +1,40 @@
+.header{
+    border: 1px solid black;
+    outline-style: groove;
+    outline-color: #0033CC;
+	background-color: white;
+}
+
+.body{
+	margin-top: 2%;
+}
+
+.profile{
+	border: 1px solid black;
+	outline-style: groove;
+	outline-color: #0033CC;
+	height: 400px; 
+	width: 50%;
+	font-size: 145%;
+	background-color: white;
+	
+}
+
+.sensorinfo{
+	border: 1px solid black;
+	outline-style: groove;
+	outline-color: #0033CC;
+	height: 400px; 
+	width: 50%;
+	font-size: 90%;
+	background-color: white;
+	
+}
+
+.edit, .sedit{
+	display: none;
+}
+
+.info, .sinfo{
+	color: green;
+}
