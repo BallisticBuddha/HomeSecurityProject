@@ -2,23 +2,23 @@
 <html>
 <head lang="en">
     <title>AC3 Main View</title>
-      <link rel="SHORTCUT ICON" href="Images/AC3-logo.ico">
-	  <link rel="stylesheet" type="text/css" href="MainView.css">
-      <script src="jqplot/jquery.min.js"></script>
-	  <script src="jqplot/jquery.jqplot.min.js"></script>
-      <script src="jqplot/jqplot.pieRenderer.min.js"></script>
-      <link href="jqplot/jquery.jqplot.min.css" type="text/css" rel="stylesheet"/>
-	  <link rel="stylesheet" href="UI/jquery-ui.css">
+      <link rel="SHORTCUT ICON" href="../Images/AC3-logo.ico">
+	  <link rel="stylesheet" type="text/css" href="../Css/MainView.css">
+      <script src="../jqplot/jquery.min.js"></script>
+	  <script src="../jqplot/jquery.jqplot.min.js"></script>
+      <script src="../jqplot/jqplot.pieRenderer.min.js"></script>
+      <link href="../jqplot/jquery.jqplot.min.css" type="text/css" rel="stylesheet"/>
+	  <link rel="stylesheet" href="../UI/jquery-ui.css">
 	  <script src="UI/jquery-1.10.2.js"></script>
-	  <script src="UI/jquery-ui.js"></script>
+	  <script src="../UI/jquery-ui.js"></script>
 	  <link rel="stylesheet" href="UI/style.css">
-      <script type="text/javascript" src="MainView.js"></script>
+      <script type="text/javascript" src="../Javascript/MainView.js"></script>
 </head>
 <body bgcolor='#3488C4'>
 <form action="#">
 <table class="header" width="100%">
 <tr>
-<td><img src="Images/AC3-logo.png" align="left" style="width:100px;height:100px"></td>
+<td><img src="../Images/AC3-logo.png" align="left" style="width:100px;height:100px"></td>
 <td align="center"><font size="8"><bold>Welcome User1</bold></font></td>
 <td align="center"><input id="Edit" type="submit" value="Edit Profile" /><input id="Logout" type="submit" value="Logout" /></td>
 </tr>
@@ -56,10 +56,10 @@
 <div class="filter" border="5px">
 <caption><font size="5" color="blue"><bold>Filter Events</bold></font></caption><br>
 UserName: <input type="text" name="FirstName"><br>
-Date1: <img src="Images/calendar.ico" style="width:30px;height:30px;vertical-align: text-bottom"><input autocomplete="off" type="text" id="date1" name="date1">
+Date1: <img src="../Images/calendar.ico" style="width:30px;height:30px;vertical-align: text-bottom"><input autocomplete="off" type="text" id="date1" name="date1">
 <label style="margin-left:25px;margin-right:25px">To</label>	
-Date2: <img src="Images/calendar.ico" style="width:30px;height:30px;vertical-align: text-bottom"><input autocomplete="off" type="text" id="date2" name="date2"><br>
-<label for="Sensor">Triggered Sensor</label>
+Date2: <img src="../Images/calendar.ico" style="width:30px;height:30px;vertical-align: text-bottom"><input autocomplete="off" type="text" id="date2" name="date2"><br>
+<label id="Sensor">Triggered Sensor</label>
 <label style="margin-left:25px" for="Sensor">Deactivated</label>
 <select name="deactivated" id="deactivated">
   <option selected="selected">NO</option>
