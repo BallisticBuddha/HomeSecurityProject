@@ -1,6 +1,11 @@
 #include <Keypad.h>
+#include <JsonGenerator.h>
+#include <Time.h>
+#include <Wire.h>
+#include <DS1307RTC.h>
 #include "HSSDevice.h"
 #include "Authenticator.h"
+#include "Event.h"
 
 //Pin Assignments
 byte rowPins[ROWS] = {12,8,7,6}; //connect to row pinouts 
@@ -153,11 +158,11 @@ void loop(){
 
   delay(cycleTime);
   if (devState == WAITING_FOR_INPUT || devState == WAITING_TO_ARM || devState == ALARMING){
-    lightup(1)
+    lightUp(1);
     waitCycleCount += 1;
   }
   else{
-    lightUp(0)
+    lightUp(0);
   }
 }
 
