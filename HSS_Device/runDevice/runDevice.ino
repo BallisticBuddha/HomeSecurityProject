@@ -76,13 +76,13 @@ void lightUp(int flashing){
   if (flashing){ // fading light
     if ((waitCycleCount % 512) < 256){ // fade up
       analogWrite(rPin, color.red * ((waitCycleCount % 256) / 255.0) );
-      analogWrite(rPin, color.green * ((waitCycleCount % 256) / 255.0) );
-      analogWrite(rPin, color.blue * ((waitCycleCount % 256) / 255.0) );
+      analogWrite(gPin, color.green * ((waitCycleCount % 256) / 255.0) );
+      analogWrite(bPin, color.blue * ((waitCycleCount % 256) / 255.0) );
     }
     else{ // fade down
-      analogWrite(rPin, color.red - (512 - (waitCycleCount % 512)) );
-      analogWrite(rPin, color.green - (512 - (waitCycleCount % 512)) );
-      analogWrite(rPin, color.blue - (512 - (waitCycleCount % 512)) );
+      analogWrite(rPin, 256 - color.red * (((waitCycleCount - 255) % 256) / 255.0) );
+      analogWrite(gPin, 256 - color.green * (((waitCycleCount - 255) % 256) / 255.0) );
+      analogWrite(bPin, 256 - color.blue * (((waitCycleCount - 255) % 256) / 255.0) );
     }
 
   }
@@ -138,6 +138,8 @@ void loop(){
         devState = WAITING_FOR_DISARM;
         usernameInput = "";
         passcodeInput = "";
+        deviceEvent = new Event(DISARM);
+        //TODO: set the sensor that triggered in the event object
       }
       break;
     case ARMED:

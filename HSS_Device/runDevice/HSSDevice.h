@@ -31,5 +31,5 @@ unsigned long armedColor = 0xFFA500; //orange
 unsigned long disarmedColor = 0x00FF00; //green
 unsigned long alarmingColor = 0xFF0000; //red
 unsigned long wfaColor = 0x0000FF; //blue
-unsigned long wfdColor = 0x00FFFF; //blue
+unsigned long wfdColor = 0x00FFFF; //cyan
 unsigned long wtaColor = 0xFFFF00; //yellow
