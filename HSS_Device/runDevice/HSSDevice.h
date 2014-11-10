@@ -3,7 +3,8 @@ enum DeviceState{
   DISABLED,
   ARMED,
   DISARMED,
-  WAITING_FOR_INPUT,
+  WAITING_FOR_ARM,
+  WAITING_FOR_DISARM,
   WAITING_TO_ARM,
   ALARMING
 };
@@ -29,5 +30,6 @@ unsigned long disabledColor = 0x000000; //off
 unsigned long armedColor = 0xFFA500; //orange
 unsigned long disarmedColor = 0x00FF00; //green
 unsigned long alarmingColor = 0xFF0000; //red
-unsigned long wfiColor = 0x0000FF; //blue
+unsigned long wfaColor = 0x0000FF; //blue
+unsigned long wfdColor = 0x00FFFF; //blue
 unsigned long wtaColor = 0xFFFF00; //yellow

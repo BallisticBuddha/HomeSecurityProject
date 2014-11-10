@@ -4,15 +4,12 @@
 enum EventType{
   DISARM,
   ARM,
-  ALARM,
-  CORRECT_PASSCODE,
-  INCORRECT_PASSCODE
+  ALARM
 };
 
 class Event{
   
   private:
-    int eventID;
     EventType eventType;
     long timeTriggered;
     int userID;
@@ -20,11 +17,13 @@ class Event{
     String picturePath;
   
   public:
-    Event(int ID, EventType type);
+    Event(EventType type);
+    ~Event();
     String typeString();
+    void setType(EventType et);
     void setUser(int uid);
     void setSensor(int sid);
-    void setPicture(String path);
-    ArduinoJson::Generator::JsonObject<6> getAsJson();
+    void setPicture(String pth);
+    ArduinoJson::Generator::JsonObject<5> getAsJson();
 
 };

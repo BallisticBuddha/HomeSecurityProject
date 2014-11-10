@@ -1,13 +1,18 @@
 #include <WString.h>
 
+struct User{
+  String userID;
+  String passcode;
+};
+
 class Authenticator{
   
   private:
-    String correctCode;
+    User authorizedUser;
   
   public:
     Authenticator();
     
-    int authenticate(String passcode);
+    int authenticate(User u);
       
 };

@@ -22,10 +22,12 @@ int cyclesToAlarm = 1500; // 15 seconds
 Authenticator auth;
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 DeviceState devState = DISARMED;
-int previouslyArmed = 0;
 int waitCycleCount = 0;
 
-String keypadInput = "";
+User deviceUser;
+Event *deviceEvent;
+String usernameInput = "";
+String passcodeInput = "";
 
 RGBColor getStateColor(DeviceState ds){
   RGBColor ret;
@@ -38,8 +40,11 @@ RGBColor getStateColor(DeviceState ds){
     case DISARMED:
       fullColor = disarmedColor;
       break;
-    case WAITING_FOR_INPUT:
-      fullColor = wfiColor;
+    case WAITING_FOR_ARM:
+      fullColor = wfaColor;
+      break;
+    case WAITING_FOR_DISARM:
+      fullColor = wfdColor;
       break;
     case WAITING_TO_ARM:
       fullColor = wtaColor;
@@ -56,6 +61,13 @@ RGBColor getStateColor(DeviceState ds){
   ret.blue = fullColor & 0x0000FF;
   
   return ret;
+}
+
+int sendEvent(Event e){
+  //TODO: Send the event object to the server.
+  delete deviceEvent;
+  deviceEvent = NULL;
+  return 0;
 }
 
 void lightUp(int flashing){
@@ -79,7 +91,30 @@ void lightUp(int flashing){
     analogWrite(gPin, color.green);
     analogWrite(bPin, color.blue);
   }
+}
 
+int appendUserString(char c){
+  if (c == '*'){
+    deviceUser.userID = usernameInput;
+    usernameInput = "";
+    return 1;
+  }
+  else if (isdigit(c)){
+    usernameInput += c;
+  }
+  return 0;
+}
+
+int appendPasscodeString(char c){
+  if (c == '#'){
+    deviceUser.passcode = passcodeInput;
+    passcodeInput = "";
+    return 1;
+  }
+  else if (isdigit(c)){
+    passcodeInput += c;
+  }
+  return 0;
 }
 
 void setup(){
@@ -99,17 +134,22 @@ void loop(){
   switch(devState){
     case ALARMING:
       if (key == 'D'){
-        devState = WAITING_FOR_INPUT;
-        previouslyArmed = 1;
-        keypadInput = "";
+        //TODO: Take a picture here
+        devState = WAITING_FOR_DISARM;
+        usernameInput = "";
+        passcodeInput = "";
       }
+      break;
     case ARMED:
       if (sensorState || key == 'D'){
         //TODO: Take a picture here
-        devState = WAITING_FOR_INPUT;
-        previouslyArmed = 1;
-        keypadInput = "";
+        devState = WAITING_FOR_DISARM;
+        usernameInput = "";
+        passcodeInput = "";
+        deviceEvent = new Event(DISARM);
+        //TODO: set the sensor that triggered in the event object
       }
+      break;
     case WAITING_TO_ARM:
       if (waitCycleCount >= cyclesToAlarm){
         devState = ARMED;
@@ -118,47 +158,91 @@ void loop(){
       break;
     case DISARMED:
       if (key == 'A'){
-        devState = WAITING_FOR_INPUT;
-        previouslyArmed = 0;
-        keypadInput = "";
+        devState = WAITING_FOR_ARM;
+        usernameInput = "";
+        passcodeInput = "";
+        deviceEvent = new Event(ARM);
       }
       break;
-    case WAITING_FOR_INPUT:
-      // Change state if time has expired
-      if (waitCycleCount >= cyclesToAlarm){
-        if (previouslyArmed){
-          devState = ALARMING;
+    case WAITING_FOR_ARM:
+      if (key){
+        if (deviceUser.userID.length() == 0){
+          appendUserString(key);
         }
         else{
-          devState = DISARMED; 
-        }
-        waitCycleCount = 0;
-      }
-      // Accept keypad input
-      if (isdigit(key)){
-        keypadInput += key;
-      }
-      else if (key == '#'){
-        if (auth.authenticate(keypadInput)){
-          if (previouslyArmed){
-            devState = DISARMED;
+          if (appendPasscodeString(key)){
+            if (auth.authenticate(deviceUser)){
+              // Successful ARM event
+              Event de = *deviceEvent;
+              de.setUser(deviceUser.userID.toInt());
+              sendEvent(de);
+              
+              devState = WAITING_TO_ARM;
+              deviceUser.userID = "";
+              deviceUser.passcode = "";
+            }
+            else{
+              deviceUser.userID = "";
+              deviceUser.passcode = "";
+            }
           }
-          else{
-            devState = WAITING_TO_ARM; 
-          }
         }
-        keypadInput = "";
       }
-      else if (key == 'D'){
-        keypadInput = "";
+      
+      if (waitCycleCount >= cyclesToAlarm){
+        // Failed ARM event
+        Event de = *deviceEvent;
+        sendEvent(de);
+
+        devState = DISARMED;
+        deviceUser.userID = "";
+        deviceUser.passcode = "";
+        waitCycleCount = 0;     
       }
       break;
-    
+    case WAITING_FOR_DISARM:
+      if (key){
+        if (deviceUser.userID.length() == 0){
+          appendUserString(key);
+        }
+        else{
+          if (appendPasscodeString(key)){
+            if (auth.authenticate(deviceUser)){
+              // Successful DISARM event
+              Event de = *deviceEvent;
+              de.setUser(deviceUser.userID.toInt());
+              sendEvent(de);
+
+              devState = DISARMED;
+              deviceUser.userID = "";
+              deviceUser.passcode = "";
+            }
+            else{
+              deviceUser.userID = "";
+              deviceUser.passcode = "";
+            }
+          }
+        }
+      }
+      
+      if (waitCycleCount >= cyclesToAlarm){
+        // ALARM event
+        Event de = *deviceEvent;
+        de.setType(ALARM);
+        sendEvent(de);
+
+        devState = ALARMING;
+        deviceUser.userID = "";
+        deviceUser.passcode = "";
+        waitCycleCount = 0;     
+      }
+      break;
   }
+  Serial.println(devState);
 
   delay(cycleTime);
-  if (devState == WAITING_FOR_INPUT || devState == WAITING_TO_ARM || devState == ALARMING){
-    lightUp(1);
+  if (devState == WAITING_FOR_ARM || devState == WAITING_FOR_DISARM || devState == WAITING_TO_ARM || devState == ALARMING){
+    lightUp(0);
     waitCycleCount += 1;
   }
   else{

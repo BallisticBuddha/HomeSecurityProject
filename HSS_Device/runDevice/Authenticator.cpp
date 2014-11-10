@@ -1,11 +1,12 @@
 #include "Authenticator.h"
 
 Authenticator::Authenticator(){
-  correctCode = "1234";
+  authorizedUser.userID = "5";
+  authorizedUser.passcode = "1234";
 }
 
-int Authenticator::authenticate(String passcode){
-  if (correctCode == passcode){
+int Authenticator::authenticate(User u){
+  if (authorizedUser.userID == u.userID && authorizedUser.passcode == u.passcode){
     return 1;
   }
   else{

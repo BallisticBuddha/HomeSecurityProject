@@ -1,10 +1,17 @@
 #include "Event.h"
 #include <Time.h>
 
-Event::Event(int ID, EventType type){
-  eventID = ID;
+Event::Event(EventType type){
   eventType = type;
   timeTriggered = now();
+}
+
+Event::~Event(){
+  delete &eventType;
+  delete &timeTriggered;
+  delete &userID;
+  delete &sensorID;
+  delete &picturePath;
 }
 
 String Event::typeString(){
@@ -19,17 +26,15 @@ String Event::typeString(){
     case ALARM:
       ret = "ALARM";
       break;
-    case CORRECT_PASSCODE:
-      ret = "CORRECT_PASSCODE";
-      break;
-    case INCORRECT_PASSCODE:
-      ret = "INCORRECT_PASSCODE";
-      break;
     default:
       ret = "UNKNOWN_EVENT_TYPE";
       break;
   }
   return ret;
+}
+
+void Event::setType(EventType et){
+  eventType = et;
 }
 
 void Event::setUser(int uid){
@@ -40,13 +45,12 @@ void Event::setSensor(int sid){
   sensorID = sid;
 }
 
-void Event::setPicture(String path){
-  picturePath = path;
+void Event::setPicture(String pth){
+  picturePath = pth;
 }
 
-ArduinoJson::Generator::JsonObject<6> Event::getAsJson(){
-  ArduinoJson::Generator::JsonObject<6> jo;
-  jo["ID"] = eventID;
+ArduinoJson::Generator::JsonObject<5> Event::getAsJson(){
+  ArduinoJson::Generator::JsonObject<5> jo;
   jo["type"] = typeString();
   jo["time"] = timeTriggered;
   jo["userID"] = userID;
