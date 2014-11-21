@@ -18,7 +18,6 @@ class Event{
   
   public:
     Event(EventType type);
-    ~Event();
     String typeString();
     void setType(EventType et);
     void setUser(int uid);

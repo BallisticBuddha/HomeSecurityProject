@@ -1,15 +1,23 @@
+#include <Arduino.h>
+#include <Wire.h>
+#include <Keypad_I2C.h>
 #include <Keypad.h>
 #include <JsonGenerator.h>
 #include <Time.h>
-#include <Wire.h>
 #include <DS1307RTC.h>
+
 #include "HSSDevice.h"
 #include "Authenticator.h"
 #include "Event.h"
 
+//Prepare I/O Expander for keypad
+//byte rowPins[ROWS] = {12,8,7,6};
+//byte colPins[COLS] = {5,4,3,2};
+byte rowPins[ROWS] = {0,1,2,3};
+byte colPins[COLS] = {4,5,6,7};
+int i2caddress = 0x20;
+
 //Pin Assignments
-byte rowPins[ROWS] = {12,8,7,6}; //connect to row pinouts 
-byte colPins[COLS] = {5,4,3,2}; //connect to column pinouts
 const int rPin = 9;
 const int gPin = 10;
 const int bPin = 11;
@@ -20,12 +28,13 @@ const int cycleTime = 10; // 10 miliseconds
 int cyclesToAlarm = 1500; // 15 seconds
 
 Authenticator auth;
-Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+//Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+Keypad_I2C keypad = Keypad_I2C( makeKeymap(keys), rowPins, colPins, ROWS, COLS, i2caddress );
 DeviceState devState = DISARMED;
 int waitCycleCount = 0;
 
 User deviceUser;
-Event *deviceEvent;
+Event* deviceEvent = NULL;
 String usernameInput = "";
 String passcodeInput = "";
 
@@ -119,10 +128,11 @@ int appendPasscodeString(char c){
 
 void setup(){
   Serial.begin(9600);
+  keypad.begin();
 
   pinMode(rPin, OUTPUT);
-  pinMode(rPin, OUTPUT);
-  pinMode(rPin, OUTPUT);
+  pinMode(gPin, OUTPUT);
+  pinMode(bPin, OUTPUT);
   pinMode(sensorPin, INPUT);
 
 }
@@ -240,11 +250,10 @@ void loop(){
       }
       break;
   }
-  Serial.println(devState);
 
   delay(cycleTime);
   if (devState == WAITING_FOR_ARM || devState == WAITING_FOR_DISARM || devState == WAITING_TO_ARM || devState == ALARMING){
-    lightUp(0);
+    lightUp(1);
     waitCycleCount += 1;
   }
   else{

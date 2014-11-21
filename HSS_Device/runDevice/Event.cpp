@@ -6,14 +6,6 @@ Event::Event(EventType type){
   timeTriggered = now();
 }
 
-Event::~Event(){
-  delete &eventType;
-  delete &timeTriggered;
-  delete &userID;
-  delete &sensorID;
-  delete &picturePath;
-}
-
 String Event::typeString(){
   String ret;
   switch(eventType){
