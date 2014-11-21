@@ -11,8 +11,6 @@
 #include "Event.h"
 
 //Prepare I/O Expander for keypad
-//byte rowPins[ROWS] = {12,8,7,6};
-//byte colPins[COLS] = {5,4,3,2};
 byte rowPins[ROWS] = {0,1,2,3};
 byte colPins[COLS] = {4,5,6,7};
 int i2caddress = 0x20;
@@ -21,14 +19,17 @@ int i2caddress = 0x20;
 const int rPin = 9;
 const int gPin = 10;
 const int bPin = 11;
-const int sensorPin = 13;
+const int s1Pin = 2;
+const int s2Pin = 3;
+const int s3Pin = 4;
+const int s4Pin = 5;
+const int s5Pin = 6;
 
 //Device Variables
 const int cycleTime = 10; // 10 miliseconds
 int cyclesToAlarm = 1500; // 15 seconds
 
 Authenticator auth;
-//Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 Keypad_I2C keypad = Keypad_I2C( makeKeymap(keys), rowPins, colPins, ROWS, COLS, i2caddress );
 DeviceState devState = DISARMED;
 int waitCycleCount = 0;
@@ -74,6 +75,7 @@ RGBColor getStateColor(DeviceState ds){
 
 int sendEvent(Event e){
   //TODO: Send the event object to the server.
+  Serial.println(e.getAsJson());
   delete deviceEvent;
   deviceEvent = NULL;
   return 0;
@@ -133,13 +135,17 @@ void setup(){
   pinMode(rPin, OUTPUT);
   pinMode(gPin, OUTPUT);
   pinMode(bPin, OUTPUT);
-  pinMode(sensorPin, INPUT);
+  pinMode(s1Pin, INPUT);
+  pinMode(s2Pin, INPUT);
+  pinMode(s3Pin, INPUT);
+  pinMode(s4Pin, INPUT);
+  pinMode(s5Pin, INPUT);
 
 }
 
 void loop(){
   char key = keypad.getKey();
-  int sensorState = digitalRead(sensorPin);
+  int triggered[5] = {digitalRead(s1Pin), digitalRead(s2Pin), digitalRead(s3Pin), digitalRead(s4Pin), digitalRead(s5Pin)};
 
   switch(devState){
     case ALARMING:
@@ -153,13 +159,14 @@ void loop(){
       }
       break;
     case ARMED:
-      if (sensorState || key == 'D'){
+      if (triggered[0] || triggered[1] || triggered[2] || triggered[3] || triggered[4] || key == 'D'){
         //TODO: Take a picture here
         devState = WAITING_FOR_DISARM;
         usernameInput = "";
         passcodeInput = "";
         deviceEvent = new Event(DISARM);
-        //TODO: set the sensor that triggered in the event object
+        Event de = *deviceEvent;
+        de.setSensors(triggered);
       }
       break;
     case WAITING_TO_ARM:

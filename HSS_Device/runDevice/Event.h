@@ -13,7 +13,7 @@ class Event{
     EventType eventType;
     long timeTriggered;
     int userID;
-    int sensorID;
+    int sensorIDs[5];
     String picturePath;
   
   public:
@@ -21,7 +21,7 @@ class Event{
     String typeString();
     void setType(EventType et);
     void setUser(int uid);
-    void setSensor(int sid);
+    void setSensors(int sensors[5]);
     void setPicture(String pth);
     ArduinoJson::Generator::JsonObject<5> getAsJson();
 

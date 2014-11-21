@@ -4,6 +4,11 @@
 Event::Event(EventType type){
   eventType = type;
   timeTriggered = now();
+  userID = 0;
+  for (int i=0; i<5; i++){
+    sensorIDs[i] = 0;
+  }
+  picturePath = "";
 }
 
 String Event::typeString(){
@@ -33,8 +38,10 @@ void Event::setUser(int uid){
   userID = uid;
 }
 
-void Event::setSensor(int sid){
-  sensorID = sid;
+void Event::setSensors(int sensors[5]){
+  for (int i = 0; i < 5; i++){
+    sensorIDs[i] = sensors[i];
+  }
 }
 
 void Event::setPicture(String pth){
@@ -43,10 +50,10 @@ void Event::setPicture(String pth){
 
 ArduinoJson::Generator::JsonObject<5> Event::getAsJson(){
   ArduinoJson::Generator::JsonObject<5> jo;
-  jo["type"] = typeString();
+  jo["type"] = Event::typeString();
   jo["time"] = timeTriggered;
   jo["userID"] = userID;
-  jo["sensorID"] = sensorID;
+  jo["sensors"] = sensorIDs;
   jo["picture"] = picturePath;
   
   return jo;
