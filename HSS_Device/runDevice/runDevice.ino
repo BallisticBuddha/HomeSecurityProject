@@ -94,7 +94,7 @@ String toBinString(byte *arr){
       int val = *arr & (1 << (7 - j));
       toRet += ( val ? '1' : '0' );
     }
-    arr += 1;
+    arr++;
   }
   return toRet;
 }

@@ -105,16 +105,12 @@ byte *Event::getBytes(){
 
   // first 2 bits are packet type, 2 for event
   toRet[0] = 2;
-  toRet[0] << 6;
-
-  Serial.println(toRet[0]);
+  toRet[0] = toRet[0] << 6;
 
   // next 2 are event type
   byte eType = Event::typeNumber();
-  eType << 4;
+  eType = eType << 4;
   toRet[0] = toRet[0] | eType;
-
-  Serial.println(toRet[0]);
 
   // next 4 are for the picture type (0 for no picture)
   byte pType;
@@ -125,8 +121,6 @@ byte *Event::getBytes(){
     pType = 1;
   }
   toRet[0] = toRet[0] | pType;
-
-  Serial.println(toRet[0]);
 
   // next 2 bytes represent the userID
   toRet[1] = userID[0];
