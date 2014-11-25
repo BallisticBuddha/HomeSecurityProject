@@ -7,6 +7,9 @@
 #include <JsonGenerator.h>
 #include <Time.h>
 #include <DS1307RTC.h>
+#include <Adafruit_VC0706.h>
+#include <SD.h>
+#include <SoftwareSerial.h>   
 
 #include "HSSDevice.h"
 #include "Authenticator.h"
@@ -22,6 +25,15 @@ byte MAC[] = {0x1C , 0x02, 0x75, 0xBD, 0xDC, 0x44};
 byte IP[] = {192, 168, 1, 148};
 byte server[] = {192, 168, 1, 106};
 EthernetClient client;
+
+//Prepare SD card
+#define chipSelect 4
+
+//Prepare the camera
+SoftwareSerial cameraconnection = SoftwareSerial(1, 0);
+Adafruit_VC0706 cam = Adafruit_VC0706(&cameraconnection);
+
+
 
 //Pin Assignments
 const int rPin = 3;
@@ -158,6 +170,10 @@ int appendPasscodeString(char c){
 }
 
 void setup(){
+  #if !defined(SOFTWARE_SPI)
+    if(chipSelect != 10) pinMode(10, OUTPUT);
+  #endif
+
   Serial.begin(9600);
   Ethernet.begin(MAC, IP);
   keypad.begin();
@@ -170,6 +186,35 @@ void setup(){
   pinMode(s3Pin, INPUT);
   pinMode(s4Pin, INPUT);
   pinMode(s5Pin, INPUT);
+
+  // see if the card is present and can be initialized:
+  if (!SD.begin(chipSelect)) {
+    Serial.println("SDCard failed, or not present");
+    // don't do anything more:
+    return;
+  }
+
+   // Try to locate the camera
+  if (cam.begin()) {
+    Serial.println("Camera Found:");
+  } else {
+    Serial.println("No camera found?");
+    return;
+  }
+
+  // Print out the camera version information
+  char *reply = cam.getVersion();
+  if (reply == 0) {
+    Serial.print("Failed to get version");
+  } else {
+    Serial.println("-----------------");
+    Serial.print(reply);
+    Serial.println("-----------------");
+  }
+
+  //cam.setImageSize(VC0706_640x480);        // large
+  //cam.setImageSize(VC0706_320x240);        // medium
+  cam.setImageSize(VC0706_160x120);          // small
 
 }
 
