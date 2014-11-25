@@ -1,12 +1,11 @@
 #include "Event.h"
-#include <Time.h>
 
 Event::Event(EventType type){
   eventType = type;
   userID[0] = 0;
   userID[1] = 0;
-  *sensorIDs = 0;
-  picturePath = "";
+  sensorIDs = new byte;
+  picturePath = NULL;
   eventSize = 4;
 }
 
@@ -30,7 +29,7 @@ void Event::setUser(String uid){
   }
 }
 
-void Event::setSensors(byte sensors[8]){
+void Event::setSensors(bool sensors[8]){
   *sensorIDs = 0;
   for (int i = 0; i < 8; i++){
     if (sensors[i]){
@@ -64,7 +63,7 @@ void Event::setSensors(byte sensors[8]){
   }
 }
 
-void Event::setPicture(String pth){
+void Event::setPicture(char *pth){
   picturePath = pth;
 }
 
@@ -105,7 +104,7 @@ byte *Event::getBytes(){
 
   // next 4 are for the picture type (0 for no picture)
   byte pType;
-  if (picturePath.length() == 0){
+  if (picturePath){
       pType = 0;
   }
   else{

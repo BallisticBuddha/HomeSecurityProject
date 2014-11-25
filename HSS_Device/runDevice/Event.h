@@ -1,6 +1,4 @@
 #include <Arduino.h>
-#include <WString.h>
-#include <JsonGenerator.h>
 
 enum EventType{
   DISARM,
@@ -13,8 +11,8 @@ class Event{
   private:
     EventType eventType;
     byte userID[2];
-    byte *sensorIDs = new byte;
-    String picturePath;
+    byte* sensorIDs;
+    char* picturePath;
     unsigned int eventSize;
     byte* data;
   
@@ -23,8 +21,8 @@ class Event{
     byte typeNumber();
     void setType(EventType et);
     void setUser(String userID);
-    void setSensors(byte sensors[8]);
-    void setPicture(String pth);
+    void setSensors(bool sensors[8]);
+    void setPicture(char *pth);
     unsigned int getEventSize();
     byte *getBytes();
     void freeData();
