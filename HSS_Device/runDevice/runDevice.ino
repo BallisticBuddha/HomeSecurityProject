@@ -26,25 +26,24 @@ byte IP[] = {192, 168, 1, 148};
 byte server[] = {192, 168, 1, 106};
 EthernetClient client;
 
-//Prepare SD card
+//Prepare SD card (eth shield uses pin 4)
 #define chipSelect 4
 
 //Prepare the camera
 SoftwareSerial cameraconnection = SoftwareSerial(1, 0);
 Adafruit_VC0706 cam = Adafruit_VC0706(&cameraconnection);
 
-
-
-//Pin Assignments
+//Digital Pin Assignments
 const int rPin = 3;
 const int gPin = 5;
 const int bPin = 6;
+const int s5Pin = 2;
 
-const int s1Pin = 2;
-const int s2Pin = 4;
-const int s3Pin = 7;
-const int s4Pin = 8;
-const int s5Pin = 9;
+//Analog Pin Assignments
+const int s1Pin = 0;
+const int s2Pin = 1;
+const int s3Pin = 2;
+const int s4Pin = 3;
 
 //Device Variables
 const int cycleTime = 10; // 10 miliseconds
@@ -220,7 +219,7 @@ void setup(){
 
 void loop(){
   char key = keypad.getKey();
-  byte triggered[8] = {digitalRead(s1Pin), digitalRead(s2Pin), digitalRead(s3Pin), digitalRead(s4Pin), digitalRead(s5Pin), 0, 0 ,0};
+  byte triggered[8] = {analogRead(s1Pin), analogRead(s2Pin), analogRead(s3Pin), analogRead(s4Pin), digitalRead(s5Pin), 0, 0 ,0};
 
   switch(devState){
     case ALARMING:
