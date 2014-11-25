@@ -13,7 +13,7 @@ class Event{
   private:
     EventType eventType;
     byte userID[2];
-    byte *sensorIDs = new byte;
+    byte* sensorIDs;
     String picturePath;
     unsigned int eventSize;
     byte* data;

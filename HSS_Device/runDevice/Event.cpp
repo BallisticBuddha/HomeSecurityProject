@@ -5,7 +5,7 @@ Event::Event(EventType type){
   eventType = type;
   userID[0] = 0;
   userID[1] = 0;
-  *sensorIDs = 0;
+  sensorIDs = NULL;
   picturePath = "";
   eventSize = 4;
 }
