@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <WString.h>
 #include <JsonGenerator.h>
 
@@ -11,18 +12,21 @@ class Event{
   
   private:
     EventType eventType;
-    long timeTriggered;
-    int userID;
-    int sensorIDs[5];
+    byte userID[2];
+    byte *sensorIDs = new byte;
     String picturePath;
+    unsigned int eventSize;
+    byte* data;
   
   public:
     Event(EventType type);
-    String typeString();
+    byte typeNumber();
     void setType(EventType et);
-    void setUser(int uid);
-    void setSensors(int sensors[5]);
+    void setUser(String userID);
+    void setSensors(byte sensors[8]);
     void setPicture(String pth);
-    ArduinoJson::Generator::JsonObject<5> getAsJson();
+    unsigned int getEventSize();
+    byte *getBytes();
+    void freeData();
 
 };

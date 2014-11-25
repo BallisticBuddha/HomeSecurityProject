@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <Wire.h>
+#include "SPI.h"
+#include <Ethernet.h>
 #include <Keypad_I2C.h>
 #include <Keypad.h>
 #include <JsonGenerator.h>
@@ -15,24 +17,32 @@ byte rowPins[ROWS] = {0,1,2,3};
 byte colPins[COLS] = {4,5,6,7};
 int i2caddress = 0x20;
 
+//Prepare for network connectivity 
+byte MAC[] = {0x1C , 0x02, 0x75, 0xBD, 0xDC, 0x44};
+byte IP[] = {192, 168, 1, 148};
+byte server[] = {192, 168, 1, 106};
+EthernetClient client;
+
 //Pin Assignments
-const int rPin = 9;
-const int gPin = 10;
-const int bPin = 11;
+const int rPin = 3;
+const int gPin = 5;
+const int bPin = 6;
+
 const int s1Pin = 2;
-const int s2Pin = 3;
-const int s3Pin = 4;
-const int s4Pin = 5;
-const int s5Pin = 6;
+const int s2Pin = 4;
+const int s3Pin = 7;
+const int s4Pin = 8;
+const int s5Pin = 9;
 
 //Device Variables
 const int cycleTime = 10; // 10 miliseconds
-int cyclesToAlarm = 1500; // 15 seconds
+//int cyclesToAlarm = 1500; // 15 seconds
+int cyclesToAlarm = 500; // 5 seconds
 
 Authenticator auth;
 Keypad_I2C keypad = Keypad_I2C( makeKeymap(keys), rowPins, colPins, ROWS, COLS, i2caddress );
 DeviceState devState = DISARMED;
-int waitCycleCount = 0;
+unsigned int waitCycleCount = 0;
 
 User deviceUser;
 Event* deviceEvent = NULL;
@@ -73,9 +83,28 @@ RGBColor getStateColor(DeviceState ds){
   return ret;
 }
 
+/*
+  For debugging purposes only
+  Converts a byte array (event or authentication packet) into a string.
+  To be used to print packets out to the serial monitor for analysis.
+*/
+String toBinString(byte arr[], int arrSize){
+  String toRet = "";
+  for (int i=0; i < arrSize; i++){
+    for (int j=0; j < 8; j++){
+      int val = *arr & (1 << (7 - j));
+      toRet += ( val ? '1' : '0' );
+    }
+    toRet += " ";
+    arr++;
+  }
+  return toRet;
+}
+
 int sendEvent(Event e){
   //TODO: Send the event object to the server.
-  Serial.println(e.getAsJson());
+  Serial.println(toBinString(e.getBytes(), e.getEventSize()));
+  e.freeData();
   delete deviceEvent;
   deviceEvent = NULL;
   return 0;
@@ -95,8 +124,8 @@ void lightUp(int flashing){
       analogWrite(gPin, 256 - color.green * (((waitCycleCount - 255) % 256) / 255.0) );
       analogWrite(bPin, 256 - color.blue * (((waitCycleCount - 255) % 256) / 255.0) );
     }
-
   }
+
   else{ // solid light
     analogWrite(rPin, color.red);
     analogWrite(gPin, color.green);
@@ -130,6 +159,7 @@ int appendPasscodeString(char c){
 
 void setup(){
   Serial.begin(9600);
+  Ethernet.begin(MAC, IP);
   keypad.begin();
 
   pinMode(rPin, OUTPUT);
@@ -145,7 +175,7 @@ void setup(){
 
 void loop(){
   char key = keypad.getKey();
-  int triggered[5] = {digitalRead(s1Pin), digitalRead(s2Pin), digitalRead(s3Pin), digitalRead(s4Pin), digitalRead(s5Pin)};
+  byte triggered[8] = {digitalRead(s1Pin), digitalRead(s2Pin), digitalRead(s3Pin), digitalRead(s4Pin), digitalRead(s5Pin), 0, 0 ,0};
 
   switch(devState){
     case ALARMING:
@@ -159,7 +189,7 @@ void loop(){
       }
       break;
     case ARMED:
-      if (triggered[0] || triggered[1] || triggered[2] || triggered[3] || triggered[4] || key == 'D'){
+      if (triggered[0] || triggered[1] || triggered[2] || triggered[3] || triggered[4] || triggered[5] || triggered[6] || triggered[7]|| key == 'D'){
         //TODO: Take a picture here
         devState = WAITING_FOR_DISARM;
         usernameInput = "";
@@ -193,7 +223,7 @@ void loop(){
             if (auth.authenticate(deviceUser)){
               // Successful ARM event
               Event de = *deviceEvent;
-              de.setUser(deviceUser.userID.toInt());
+              de.setUser(deviceUser.userID);
               sendEvent(de);
               
               devState = WAITING_TO_ARM;
@@ -207,7 +237,6 @@ void loop(){
           }
         }
       }
-      
       if (waitCycleCount >= cyclesToAlarm){
         // Failed ARM event
         Event de = *deviceEvent;
@@ -229,7 +258,7 @@ void loop(){
             if (auth.authenticate(deviceUser)){
               // Successful DISARM event
               Event de = *deviceEvent;
-              de.setUser(deviceUser.userID.toInt());
+              de.setUser(deviceUser.userID);
               sendEvent(de);
 
               devState = DISARMED;
