@@ -36,7 +36,8 @@ const int s5Pin = 9;
 
 //Device Variables
 const int cycleTime = 10; // 10 miliseconds
-int cyclesToAlarm = 1500; // 15 seconds
+//int cyclesToAlarm = 1500; // 15 seconds
+int cyclesToAlarm = 500; // 5 seconds
 
 Authenticator auth;
 Keypad_I2C keypad = Keypad_I2C( makeKeymap(keys), rowPins, colPins, ROWS, COLS, i2caddress );
@@ -87,13 +88,14 @@ RGBColor getStateColor(DeviceState ds){
   Converts a byte array (event or authentication packet) into a string.
   To be used to print packets out to the serial monitor for analysis.
 */
-String toBinString(byte *arr){
+String toBinString(byte arr[], int arrSize){
   String toRet = "";
-  for (int i=0; i < 4; i++){
+  for (int i=0; i < arrSize; i++){
     for (int j=0; j < 8; j++){
       int val = *arr & (1 << (7 - j));
       toRet += ( val ? '1' : '0' );
     }
+    toRet += " ";
     arr++;
   }
   return toRet;
@@ -101,7 +103,8 @@ String toBinString(byte *arr){
 
 int sendEvent(Event e){
   //TODO: Send the event object to the server.
-  Serial.println(toBinString(e.getBytes()));
+  Serial.println(toBinString(e.getBytes(), e.getEventSize()));
+  e.freeData();
   delete deviceEvent;
   deviceEvent = NULL;
   return 0;

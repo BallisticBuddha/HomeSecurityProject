@@ -3,11 +3,11 @@
 
 Event::Event(EventType type){
   eventType = type;
-  timeTriggered = now();
   userID[0] = 0;
   userID[1] = 0;
-  sensorIDs = 0;
+  *sensorIDs = 0;
   picturePath = "";
+  eventSize = 4;
 }
 
 void Event::setType(EventType et){
@@ -31,47 +31,35 @@ void Event::setUser(String uid){
 }
 
 void Event::setSensors(byte sensors[8]){
+  *sensorIDs = 0;
   for (int i = 0; i < 8; i++){
-    byte sByte;
-    switch(i){
-      case 0:
-        sensorIDs = sensors[0];
-        sensorIDs << 7;
-        break;
-      case 1:
-        sByte = sensors[1];
-        sByte << 6;
-        sensorIDs = sensorIDs | sByte;
-        break;
-      case 2:
-        sByte = sensors[2];
-        sByte << 5;
-        sensorIDs = sensorIDs | sByte;
-        break;
-      case 3:
-        sByte = sensors[3];
-        sByte << 4;
-        sensorIDs = sensorIDs | sByte;
-        break;
-      case 4:
-        sByte = sensors[4];
-        sByte << 3;
-        sensorIDs = sensorIDs | sByte;
-        break;
-      case 5:
-        sByte = sensors[5];
-        sByte << 2;
-        sensorIDs = sensorIDs | sByte;
-        break;
-      case 6:
-        sByte = sensors[6];
-        sByte << 1;
-        sensorIDs = sensorIDs | sByte;
-        break;
-      case 7:
-        sByte = sensors[7];
-        sensorIDs = sensorIDs | sByte;
-        break;
+    if (sensors[i]){
+      switch(i){
+        case 0:
+          *sensorIDs = *sensorIDs | 128;
+          break;
+        case 1:
+          *sensorIDs = *sensorIDs | 64;
+          break;
+        case 2:
+          *sensorIDs = *sensorIDs | 32;
+          break;
+        case 3:
+          *sensorIDs = *sensorIDs | 16;
+          break;
+        case 4:
+          *sensorIDs = *sensorIDs | 8;
+          break;
+        case 5:
+          *sensorIDs = *sensorIDs | 4;
+          break;
+        case 6:
+          *sensorIDs = *sensorIDs | 2;
+          break;
+        case 7:
+          *sensorIDs = *sensorIDs | 1;
+          break;
+      }
     }
   }
 }
@@ -99,18 +87,21 @@ byte Event::typeNumber(){
   return ret;
 }
 
+unsigned int Event::getEventSize(){
+  return eventSize;
+}
 
 byte *Event::getBytes(){
-  byte toRet[4];
+  data = new byte[eventSize];
 
   // first 2 bits are packet type, 2 for event
-  toRet[0] = 2;
-  toRet[0] = toRet[0] << 6;
+  data[0] = 2;
+  data[0] = data[0] << 6;
 
   // next 2 are event type
   byte eType = Event::typeNumber();
   eType = eType << 4;
-  toRet[0] = toRet[0] | eType;
+  data[0] = data[0] | eType;
 
   // next 4 are for the picture type (0 for no picture)
   byte pType;
@@ -120,19 +111,28 @@ byte *Event::getBytes(){
   else{
     pType = 1;
   }
-  toRet[0] = toRet[0] | pType;
+  data[0] = data[0] | pType;
 
   // next 2 bytes represent the userID
-  toRet[1] = userID[0];
-  toRet[2] = userID[1];
+  data[1] = userID[0];
+  data[2] = userID[1];
 
   // next byte is for the sensor IDs
-  toRet[3] = sensorIDs;
+  data[3] = *sensorIDs;
 
-  // next 4 bytes are for the time triggered
-  
+  // The rest of the data represents the picture taken (if there was one)
 
-  return toRet;
+  return data;
+}
+
+void Event::freeData(){
+  if (sensorIDs){
+    delete sensorIDs;
+    sensorIDs = NULL;
+  }
+
+  delete data;
+  data = NULL;
 }
 
 

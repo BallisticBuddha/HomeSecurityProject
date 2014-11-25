@@ -12,10 +12,11 @@ class Event{
   
   private:
     EventType eventType;
-    long timeTriggered;
     byte userID[2];
-    byte sensorIDs;
+    byte *sensorIDs = new byte;
     String picturePath;
+    unsigned int eventSize;
+    byte* data;
   
   public:
     Event(EventType type);
@@ -24,6 +25,8 @@ class Event{
     void setUser(String userID);
     void setSensors(byte sensors[8]);
     void setPicture(String pth);
+    unsigned int getEventSize();
     byte *getBytes();
+    void freeData();
 
 };
