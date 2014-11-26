@@ -9,7 +9,7 @@
 #include <DS1307RTC.h>
 
 #include "HSSDevice.h"
-#include "Authenticator.h"
+#include "ServerConnector.h"
 #include "Event.h"
 
 //Prepare I/O Expander for keypad
@@ -21,7 +21,7 @@ int i2caddress = 0x20;
 byte MAC[] = {0x1C , 0x02, 0x75, 0xBD, 0xDC, 0x44};
 byte IP[] = {192, 168, 1, 148};
 byte server[] = {192, 168, 1, 106};
-EthernetClient client;
+int serverPort = 8088;
 
 //Pin Assignments
 const int rPin = 3;
@@ -39,7 +39,8 @@ const int cycleTime = 10; // 10 miliseconds
 //int cyclesToAlarm = 1500; // 15 seconds
 int cyclesToAlarm = 500; // 5 seconds
 
-Authenticator auth;
+EthernetClient client;
+ServerConnector sConn(client, server, serverPort);
 Keypad_I2C keypad = Keypad_I2C( makeKeymap(keys), rowPins, colPins, ROWS, COLS, i2caddress );
 DeviceState devState = DISARMED;
 unsigned int waitCycleCount = 0;
@@ -220,7 +221,7 @@ void loop(){
         }
         else{
           if (appendPasscodeString(key)){
-            if (auth.authenticate(deviceUser)){
+            if (sConn.authenticate(deviceUser)){
               // Successful ARM event
               Event de = *deviceEvent;
               de.setUser(deviceUser.userID);
@@ -255,7 +256,7 @@ void loop(){
         }
         else{
           if (appendPasscodeString(key)){
-            if (auth.authenticate(deviceUser)){
+            if (sConn.authenticate(deviceUser)){
               // Successful DISARM event
               Event de = *deviceEvent;
               de.setUser(deviceUser.userID);
