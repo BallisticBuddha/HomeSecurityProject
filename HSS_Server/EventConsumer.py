@@ -68,7 +68,7 @@ class EventConsumer(Server):
 				filename = "sample.jpg"
 				with open(filename, 'wb') as f:
 					for i in range(0, pictureSize - 1):
-						f.write(sensors[8 + i])
+						f.write(event[8 + i])
 
 			# Print event data to console
 
