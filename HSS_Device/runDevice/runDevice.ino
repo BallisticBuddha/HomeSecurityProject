@@ -24,16 +24,17 @@ byte server[] = {192, 168, 1, 106};
 int authPort = 8088;
 int eventPort = 8089;
 
-//Pin Assignments
+//Analog pin assignments
 const int rPin = 3;
 const int gPin = 5;
 const int bPin = 6;
+const int s5Pin = 0;
 
+//Digital pin assignments
 const int s1Pin = 2;
-const int s2Pin = 4;
-const int s3Pin = 7;
-const int s4Pin = 8;
-const int s5Pin = 9;
+const int s2Pin = 7;
+const int s3Pin = 8;
+const int s4Pin = 9;
 
 //Device Variables
 const int cycleTime = 10; // 10 miliseconds
@@ -106,6 +107,7 @@ String toBinString(byte arr[], int arrSize){
 int sendEvent(Event e){
   //TODO: Send the event object to the server.
   Serial.println(toBinString(e.getBytes(), e.getEventSize()));
+  sConn.sendEvent(e.getBytes(), e.getEventSize());
   e.freeData();
   delete deviceEvent;
   deviceEvent = NULL;
@@ -177,13 +179,14 @@ void setup(){
 
 void loop(){
   char key = keypad.getKey();
-  byte triggered[8] = {digitalRead(s1Pin), digitalRead(s2Pin), digitalRead(s3Pin), digitalRead(s4Pin), digitalRead(s5Pin), 0, 0 ,0};
+  bool triggered[8] = {digitalRead(s1Pin), digitalRead(s2Pin), digitalRead(s3Pin), digitalRead(s4Pin),analogRead(s5Pin), 0, 0 ,0};
 
   switch(devState){
     case ALARMING:
       if (key == 'D'){
         //TODO: Take a picture here
         devState = WAITING_FOR_DISARM;
+        waitCycleCount = 0;
         usernameInput = "";
         passcodeInput = "";
         deviceEvent = new Event(DISARM);

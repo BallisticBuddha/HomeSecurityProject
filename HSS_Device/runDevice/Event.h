@@ -23,7 +23,7 @@ class Event{
     byte typeNumber();
     void setType(EventType et);
     void setUser(String userID);
-    void setSensors(byte sensors[8]);
+    void setSensors(bool sensors[8]);
     void setPicture(String pth);
     unsigned int getEventSize();
     byte *getBytes();

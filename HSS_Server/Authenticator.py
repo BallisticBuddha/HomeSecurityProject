@@ -10,12 +10,13 @@ class Authenticator(Server):
 		self.users = self.setUsers()
 		self.running = True
 		print("Authentication Server started...")
-	
+
+
 	def listenForAuth(self):
 		while self.running:
 			self.sock.listen(0)
 			cSock, cAddr = self.sock.accept()
-			print("Accepted connection from %s" % str(cAddr))
+			print("[Authenticator] Accepted connection from %s." % str(cAddr))
 			connAlive = True
 			message = ""
 
@@ -29,16 +30,16 @@ class Authenticator(Server):
 
 			msgre = re.search("uid:([0-9]*),pass:([0-9]*)", message)
 			if not msgre or len(msgre.groups()) < 2:
-				print("malformed authentication request recieved: \n%s" % message)
+				print("[Authenticator] malformed authentication request recieved: \n%s" % message)
 			else:
 				user = msgre.group(1)
 				passcode = msgre.group(2)
 				userTup = (user, passcode)
 				if userTup in self.users:
-					print("User %s successfully authenticated." % user)
+					print("[Authenticator] User %s successfully authenticated." % user)
 					cSock.send("success".encode())
 				else:
-					print("Failed to authenticate user %s" % user)
+					print("[Authenticator] Failed to authenticate user %s." % user)
 					cSock.send("fail".encode())
 
 			cSock.close()

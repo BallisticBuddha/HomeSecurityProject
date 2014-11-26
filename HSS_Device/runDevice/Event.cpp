@@ -5,7 +5,7 @@ Event::Event(EventType type){
   eventType = type;
   userID[0] = 0;
   userID[1] = 0;
-  sensorIDs = NULL;
+  sensorIDs = new byte;
   picturePath = "";
   eventSize = 4;
 }
@@ -21,7 +21,7 @@ void Event::setUser(String uid){
     userID[1] = uid[1];
   }
   else if (uid.length() == 1){
-    userID[0] = '0';
+    userID[0] = 0;
     userID[1] = uid[0];
   }
   else{
@@ -30,7 +30,7 @@ void Event::setUser(String uid){
   }
 }
 
-void Event::setSensors(byte sensors[8]){
+void Event::setSensors(bool sensors[8]){
   *sensorIDs = 0;
   for (int i = 0; i < 8; i++){
     if (sensors[i]){
