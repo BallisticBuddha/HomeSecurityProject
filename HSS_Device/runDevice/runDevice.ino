@@ -19,7 +19,7 @@ int i2caddress = 0x20;
 
 //Prepare for network connectivity 
 byte MAC[] = {0x1C , 0x02, 0x75, 0xBD, 0xDC, 0x44};
-byte IP[] = {192, 168, 1, 148};
+byte IP[] = {192, 168, 1, 48};
 byte server[] = {192, 168, 1, 106};
 int serverPort = 8088;
 
@@ -36,8 +36,8 @@ const int s5Pin = 9;
 
 //Device Variables
 const int cycleTime = 10; // 10 miliseconds
-//int cyclesToAlarm = 1500; // 15 seconds
-int cyclesToAlarm = 500; // 5 seconds
+int cyclesToAlarm = 1500; // 15 seconds
+//int cyclesToAlarm = 500; // 5 seconds
 
 EthernetClient client;
 ServerConnector sConn(client, server, serverPort);

@@ -25,6 +25,12 @@ int ServerConnector::authenticate(User u){
     return res;
   }
 
+  if (sizeof(u.userID) > 2){
+    for (int i=0; i < 2; i++){
+      u.userID = u.userID.substring(0,2);
+    }
+  }
+
   String toSend = "uid:";
   toSend += u.userID;
   toSend += ",pass:";
@@ -32,13 +38,25 @@ int ServerConnector::authenticate(User u){
 
   ethClient.println(toSend);
 
-  
+  String recvMsg = "";
+  while (ethClient.connected()){
+    if (ethClient.available()){
+      char cRecv = ethClient.read();
+      if (cRecv >= 0){
+        recvMsg += cRecv;
+      }
+    }
+  }
 
-  if (authorizedUser.userID == u.userID && authorizedUser.passcode == u.passcode){
+  ethClient.stop();
+  ethClient.flush();
+  Serial.println("Disconnected from server");
+
+  if (recvMsg == "success"){
     return 1;
   }
   else{
-    return 0; 
+    return 0;
   }
 }
 
