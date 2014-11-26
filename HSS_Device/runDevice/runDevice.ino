@@ -21,7 +21,8 @@ int i2caddress = 0x20;
 byte MAC[] = {0x1C , 0x02, 0x75, 0xBD, 0xDC, 0x44};
 byte IP[] = {192, 168, 1, 48};
 byte server[] = {192, 168, 1, 106};
-int serverPort = 8088;
+int authPort = 8088;
+int eventPort = 8089;
 
 //Pin Assignments
 const int rPin = 3;
@@ -40,7 +41,7 @@ int cyclesToAlarm = 1500; // 15 seconds
 //int cyclesToAlarm = 500; // 5 seconds
 
 EthernetClient client;
-ServerConnector sConn(client, server, serverPort);
+ServerConnector sConn(client, server, authPort, eventPort);
 Keypad_I2C keypad = Keypad_I2C( makeKeymap(keys), rowPins, colPins, ROWS, COLS, i2caddress );
 DeviceState devState = DISARMED;
 unsigned int waitCycleCount = 0;

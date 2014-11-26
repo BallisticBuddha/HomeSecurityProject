@@ -1,25 +1,34 @@
 #include "ServerConnector.h"
 
-ServerConnector::ServerConnector(EthernetClient eClient, byte *server, int port){
+ServerConnector::ServerConnector(EthernetClient eClient, byte *server, int aPort, int ePort){
   ethClient = eClient;
   for (int i=0; i<4; i++){
     sAddr[i] = server[i];
   }
-  sPort = port;
+  this->aPort = aPort;
+  this->ePort = ePort;
   authorizedUser.userID = "5";
   authorizedUser.passcode = "1234";
 }
 
-int ServerConnector::connect(){
-  int result = ethClient.connect(sAddr, sPort);
+int ServerConnector::connectToAuth(){
+  int result = ethClient.connect(sAddr, aPort);
   if (result)
-    Serial.println("Connected to server");
+    Serial.println("Connected to authentication server.");
+
+  return result;
+}
+
+int ServerConnector::connectToEvent(){
+  int result = ethClient.connect(sAddr, ePort);
+  if (result)
+    Serial.println("Connected to event consumer server.");
 
   return result;
 }
 
 int ServerConnector::authenticate(User u){
-  int res = this->connect();
+  int res = connectToAuth();
 
   if (!res){
     return res;
@@ -50,7 +59,7 @@ int ServerConnector::authenticate(User u){
 
   ethClient.stop();
   ethClient.flush();
-  Serial.println("Disconnected from server");
+  Serial.println("Disconnected from authentication server.");
 
   if (recvMsg == "success"){
     return 1;
@@ -61,11 +70,18 @@ int ServerConnector::authenticate(User u){
 }
 
 int ServerConnector::sendEvent(byte *arr, int len){
-  if (this->connect()){
-     ethClient.write(arr, len);
-     return 1;
+  int res = connectToEvent();
+
+  if (!res){
+    return res;
   }
+
+  ethClient.write(arr, len);
+
+  ethClient.stop();
+  ethClient.flush();
+  Serial.println("Disconnected from event consumer server.");
   
-  return 0;
+  return 1;
 
 }

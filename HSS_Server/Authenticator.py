@@ -1,17 +1,15 @@
 #!/usr/bin/python3
 
 import re
-from socket import socket, AF_INET, SOCK_STREAM
+from Server import Server
 
-class Authenticator(object):
+class Authenticator(Server):
 
 	def __init__(self, sAddr='127.0.0.1', sPort=8088, buffSize=1024):
-		self.sock = socket(AF_INET, SOCK_STREAM)
-		self.buffSize = buffSize
-		self.sock.bind((sAddr, sPort))
+		Server.__init__(self, sAddr, sPort, buffSize)
 		self.users = self.setUsers()
 		self.running = True
-		print("Server started...")
+		print("Authentication Server started...")
 	
 	def listenForAuth(self):
 		while self.running:
