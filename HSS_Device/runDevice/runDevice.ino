@@ -38,14 +38,17 @@ const int s4Pin = 9;
 
 //Device Variables
 const int cycleTime = 10; // 10 miliseconds
-int cyclesToAlarm = 1500; // 15 seconds
-//int cyclesToAlarm = 500; // 5 seconds
+const int cyclesPerHeartbeat = 500; // 5 seconds
+const int cyclesToAlarm = 1500; // 15 seconds
+//const int cyclesToAlarm = 500; // 5 seconds
 
 EthernetClient client;
 ServerConnector sConn(client, server, authPort, eventPort);
 Keypad_I2C keypad = Keypad_I2C( makeKeymap(keys), rowPins, colPins, ROWS, COLS, i2caddress );
 DeviceState devState = DISARMED;
+DeviceState prevState = devState;
 unsigned int waitCycleCount = 0;
+unsigned int hbCycleCount = 0;
 
 User deviceUser;
 Event* deviceEvent = NULL;
@@ -178,6 +181,20 @@ void setup(){
 }
 
 void loop(){
+  if ((hbCycleCount % cyclesPerHeartbeat) == 0){
+    if (!sConn.sendHeartbeat()){
+      if (devState != DISABLED){
+        Serial.println("Server is unavailable or not responding, disabling device.");
+        prevState = devState;
+        devState = DISABLED;
+      }
+    }
+    else if(devState == DISABLED){
+      Serial.println("Server is responding again, enabling device.");
+      devState = prevState;
+    }
+  }
+
   char key = keypad.getKey();
   bool triggered[8] = {digitalRead(s1Pin), digitalRead(s2Pin), digitalRead(s3Pin), digitalRead(s4Pin),analogRead(s5Pin), 0, 0 ,0};
 
@@ -293,9 +310,10 @@ void loop(){
   }
 
   delay(cycleTime);
+  hbCycleCount++;
   if (devState == WAITING_FOR_ARM || devState == WAITING_FOR_DISARM || devState == WAITING_TO_ARM || devState == ALARMING){
     lightUp(1);
-    waitCycleCount += 1;
+    waitCycleCount++;
   }
   else{
     lightUp(0);

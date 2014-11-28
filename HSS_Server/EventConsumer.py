@@ -11,6 +11,15 @@ class EventConsumer(Server):
 		print("Event Consumer Server started...")
 		
 
+	def getHBResponse(self):
+		resByte = 1 << 6 # heartbeat packet type
+		resByte = resByte | (2 << 4) # response heartbeat type
+
+		if self.running:
+			resByte = resByte | 1 # 1 for alive
+
+		return bytes([resByte])
+
 	def consumeEvents(self):
 		while self.running:
 			self.sock.listen(0)
@@ -27,6 +36,9 @@ class EventConsumer(Server):
 				for c in data:
 					event.append(c)
 
+				if (event[0] >> 6) == 1: # heartbeat message
+					connAlive = False
+
 				if (event[0] & 0x0F) == 0: # no picture (should be exactly 4 bytes)
 					if len(event) >= 4:
 						connAlive = False
@@ -39,77 +51,103 @@ class EventConsumer(Server):
 					if len(event) >= pictureSize + 8:
 						connAlive = False
 
-			print("[Event Consumer] Event recieved.")
+			print("[Event Consumer] Packet recieved.")
 
 			# Organize event data
 			timeReceived = datetime.now()
 			packetType = event[0] >> 6
-			eventType = (event[0] & 0x30) >> 4
-			pictureType = event[0] & 0x0F
-			if event[1] == 0 and event[2] == 0:
-				userID = None
-			elif event[1] == 0:
-				userID = chr(event[2])
-			else:
-				userID = chr(event[1]) + chr(event[2])
 
-			sensors = [ False for _ in range(0,8) ]
+			# print common data to console
+			print("Time Received: %s" % str(timeReceived))
 
-			sensors[0] = ((event[3] & 128) >> 7) == 1
-			sensors[1] = ((event[3] & 64) >> 6) == 1
-			sensors[2] = ((event[3] & 32) >> 5) == 1
-			sensors[3] = ((event[3] & 16) >> 4) == 1
-			sensors[4] = ((event[3] & 8) >> 3) == 1
-			sensors[5] = ((event[3] & 4) >> 2) == 1
-			sensors[6] = ((event[3] & 2) >> 1) == 1
-			sensors[7] = (event[3] & 1) == 1
-
-			if pictureSize:
-				filename = "sample.jpg"
-				with open(filename, 'wb') as f:
-					for i in range(0, pictureSize - 1):
-						f.write(event[8 + i])
-
-			# Print event data to console
-
-			# Packet Type (should always be 2)
-			if packetType == 2:
+			if packetType == 1:
+				pTypeStr = "HEARTBEAT"
+			elif packetType == 2:
 				pTypeStr = "EVENT"
 			else:
 				pTypeStr = "INVALID"
 			print("Packet Type: %s" % pTypeStr)
 
-			# Event Type
-			if eventType == 1:
-				eTypeStr = "ARM"
-			elif eventType == 2:
-				eTypeStr = "DISARM"
-			elif eventType == 3:
-				eTypeStr = "ALARM"
-			else:
-				eTypeStr = "INVALID"
-			print("Event Type: %s" % eTypeStr)
+			if packetType == 1: # heartbeat
+				hbType = (event[0] & 0x30) >> 4;
+				hbMessage = event[0] & 0x0F;
 
-			# Time Received
-			print("Time Received: %s" % str(timeReceived))
+				if hbType == 1:
+					cSock.send(self.getHBResponse())
+					hbTypeStr = "REQUEST"
+				elif hbType == 2:
+					hbTypeStr = "RESPONSE"
+				else:
+					hbTypeStr = "INVALID"
 
-			# User ID
-			print("UserID: %s" % userID)
+				print("Heartbeat Type: %s" % hbTypeStr)
 
-			# Sensors Triggered
-			print("Sensors Triggered:")
-			for i in range(0,len(sensors)):
-				print("\tSensor %i: %s" % (i + 1, sensors[i]))
+				print("Heartbeat Message: %i" % hbMessage)
 
-			# Picture Type
-			if pictureType == 1:
-				pTypeStr = "JPEG"
-			elif pictureType == 0:
-				pTypeStr = "NONE"
-			print("Picture Type: %s" % pTypeStr)
-
-			if pictureType:
-				print("Picture Size: %i bytes" % pictureSize)
-				print("Picture Location: %s" % filename)
-
+			# This is (I think) the earliest we can close the socket
 			cSock.close()
+
+
+			if packetType == 2: # event
+				eventType = (event[0] & 0x30) >> 4
+				pictureType = event[0] & 0x0F
+				if event[1] == 0 and event[2] == 0:
+					userID = None
+				elif event[1] == 0:
+					userID = chr(event[2])
+				else:
+					userID = chr(event[1]) + chr(event[2])
+
+				sensors = [ False for _ in range(0,8) ]
+
+				sensors[0] = ((event[3] & 128) >> 7) == 1
+				sensors[1] = ((event[3] & 64) >> 6) == 1
+				sensors[2] = ((event[3] & 32) >> 5) == 1
+				sensors[3] = ((event[3] & 16) >> 4) == 1
+				sensors[4] = ((event[3] & 8) >> 3) == 1
+				sensors[5] = ((event[3] & 4) >> 2) == 1
+				sensors[6] = ((event[3] & 2) >> 1) == 1
+				sensors[7] = (event[3] & 1) == 1
+
+				if pictureSize:
+					filename = "sample.jpg"
+					with open(filename, 'wb') as f:
+						for i in range(0, pictureSize - 1):
+							f.write(event[8 + i])
+
+				# Print event data to console
+
+				# Event Type
+				if eventType == 1:
+					eTypeStr = "ARM"
+				elif eventType == 2:
+					eTypeStr = "DISARM"
+				elif eventType == 3:
+					eTypeStr = "ALARM"
+				else:
+					eTypeStr = "INVALID"
+				print("Event Type: %s" % eTypeStr)
+
+
+				# User ID
+				print("UserID: %s" % userID)
+
+				# Sensors Triggered
+				print("Sensors Triggered:")
+				for i in range(0,len(sensors)):
+					print("\tSensor %i: %s" % (i + 1, sensors[i]))
+
+				# Picture Type
+				if pictureType == 1:
+					pTypeStr = "JPEG"
+				elif pictureType == 0:
+					pTypeStr = "NONE"
+				print("Picture Type: %s" % pTypeStr)
+
+				if pictureType:
+					print("Picture Size: %i bytes" % pictureSize)
+					print("Picture Location: %s" % filename)
+
+
+
+
