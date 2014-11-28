@@ -4,13 +4,21 @@
 #include <Ethernet.h>
 #include <Keypad_I2C.h>
 #include <Keypad.h>
-#include <JsonGenerator.h>
-#include <Time.h>
-#include <DS1307RTC.h>
+#include <Adafruit_VC0706.h>
+#include <SD.h>
+#include <SoftwareSerial.h> 
 
 #include "HSSDevice.h"
 #include "ServerConnector.h"
 #include "Event.h"
+
+//Prepare SD card
+#define chipSelect 4
+
+// Prepare Camera
+// Using hardware serial on Mega: camera TX conn. to RX1,
+// camera RX to TX1, no SoftwareSerial object is required:
+Adafruit_VC0706 cam = Adafruit_VC0706(&Serial1);
 
 //Prepare I/O Expander for keypad
 byte rowPins[ROWS] = {0,1,2,3};
@@ -168,9 +176,12 @@ int appendPasscodeString(char c){
 }
 
 void setup(){
-  Serial.begin(9600);
-  Ethernet.begin(MAC, IP);
-  keypad.begin();
+  // When using hardware SPI, the SS pin MUST be set to an
+  // output (even if not connected or used).  If left as a
+  // floating input w/SPI on, this can cause lockuppage.
+#if !defined(SOFTWARE_SPI)
+  if(chipSelect != 53) pinMode(53, OUTPUT); // SS on Mega
+#endif
 
   pinMode(rPin, OUTPUT);
   pinMode(gPin, OUTPUT);
@@ -184,6 +195,37 @@ void setup(){
   pinMode(s7Pin, INPUT);
   pinMode(s8Pin, INPUT);
 
+  Serial.begin(9600);
+  Ethernet.begin(MAC, IP);
+  keypad.begin();
+
+  // see if the card is present and can be initialized:
+  if (!SD.begin(chipSelect)){
+    Serial.println("SD card failed, or not present");
+    return;
+  } 
+
+  // Try to locate the camera
+  if (cam.begin()) {
+    Serial.println("Camera Found:");
+  }
+  else {
+    Serial.println("No camera found?");
+    return;
+  }
+  // Print out the camera version information (optional)
+  char *reply = cam.getVersion();
+  if (reply == 0) {
+    Serial.print("Failed to get version");
+  } else {
+    Serial.println("-----------------");
+    Serial.print(reply);
+    Serial.println("-----------------");
+  }
+
+  cam.setImageSize(VC0706_640x480);        // biggest
+  //cam.setImageSize(VC0706_320x240);        // medium
+  //cam.setImageSize(VC0706_160x120);          // small
 }
 
 void loop(){

@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <WString.h>
-#include <JsonGenerator.h>
 
 enum EventType{
   DISARM,
