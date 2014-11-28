@@ -5,20 +5,16 @@
 #include <Keypad_I2C.h>
 #include <Keypad.h>
 #include <Adafruit_VC0706.h>
-#include <SD.h>
-#include <SoftwareSerial.h> 
-
+#include <SoftwareSerial.h>
 #include "HSSDevice.h"
 #include "ServerConnector.h"
 #include "Event.h"
-
-//Prepare SD card
-#define chipSelect 4
 
 // Prepare Camera
 // Using hardware serial on Mega: camera TX conn. to RX1,
 // camera RX to TX1, no SoftwareSerial object is required:
 Adafruit_VC0706 cam = Adafruit_VC0706(&Serial1);
+int jpglen = 0;
 
 //Prepare I/O Expander for keypad
 byte rowPins[ROWS] = {0,1,2,3};
@@ -175,14 +171,28 @@ int appendPasscodeString(char c){
   return 0;
 }
 
-void setup(){
-  // When using hardware SPI, the SS pin MUST be set to an
-  // output (even if not connected or used).  If left as a
-  // floating input w/SPI on, this can cause lockuppage.
-#if !defined(SOFTWARE_SPI)
-  if(chipSelect != 53) pinMode(53, OUTPUT); // SS on Mega
-#endif
+byte* snapPicture(){
+  if (!cam.takePicture()) 
+    Serial.println("Failed to snap!");
+  else 
+    Serial.println("Picture taken!");
 
+  // Get the size of the image (frame) taken  
+  jpglen = cam.frameLength();
+
+  byte* pic = new byte[jpglen];
+
+  for (int i=0; i < jpglen; i++){
+    uint8_t *buffer;
+    uint8_t bytesToRead = 1;
+    buffer = cam.readPicture(bytesToRead);
+    pic[i] = *buffer;
+  }
+
+  return pic;
+}
+
+void setup(){
   pinMode(rPin, OUTPUT);
   pinMode(gPin, OUTPUT);
   pinMode(bPin, OUTPUT);
@@ -198,12 +208,6 @@ void setup(){
   Serial.begin(9600);
   Ethernet.begin(MAC, IP);
   keypad.begin();
-
-  // see if the card is present and can be initialized:
-  if (!SD.begin(chipSelect)){
-    Serial.println("SD card failed, or not present");
-    return;
-  } 
 
   // Try to locate the camera
   if (cam.begin()) {
@@ -223,9 +227,9 @@ void setup(){
     Serial.println("-----------------");
   }
 
-  cam.setImageSize(VC0706_640x480);        // biggest
+  //cam.setImageSize(VC0706_640x480);        // biggest
   //cam.setImageSize(VC0706_320x240);        // medium
-  //cam.setImageSize(VC0706_160x120);          // small
+  cam.setImageSize(VC0706_160x120);          // small
 }
 
 void loop(){
@@ -250,24 +254,26 @@ void loop(){
   switch(devState){
     case ALARMING:
       if (key == 'D'){
-        //TODO: Take a picture here
+        byte* pic = snapPicture();
         devState = WAITING_FOR_DISARM;
         waitCycleCount = 0;
         usernameInput = "";
         passcodeInput = "";
         deviceEvent = new Event(DISARM);
-        //TODO: set the sensor that triggered in the event object
+        Event de = *deviceEvent;
+        de.setPicture(jpglen, pic);
       }
       break;
     case ARMED:
       if (triggered[0] || triggered[1] || triggered[2] || triggered[3] || triggered[4] || triggered[5] || triggered[6] || triggered[7]|| key == 'D'){
-        //TODO: Take a picture here
+        byte* pic = snapPicture();
         devState = WAITING_FOR_DISARM;
         usernameInput = "";
         passcodeInput = "";
         deviceEvent = new Event(DISARM);
         Event de = *deviceEvent;
         de.setSensors(triggered);
+        de.setPicture(jpglen, pic);
       }
       break;
     case WAITING_TO_ARM:

@@ -5,7 +5,8 @@ Event::Event(EventType type){
   userID[0] = 0;
   userID[1] = 0;
   sensorIDs = new byte;
-  picturePath = "";
+  *sensorIDs = 0;
+  picture = NULL;
   eventSize = 4;
 }
 
@@ -30,7 +31,6 @@ void Event::setUser(String uid){
 }
 
 void Event::setSensors(bool sensors[8]){
-  *sensorIDs = 0;
   for (int i = 0; i < 8; i++){
     if (sensors[i]){
       switch(i){
@@ -63,8 +63,11 @@ void Event::setSensors(bool sensors[8]){
   }
 }
 
-void Event::setPicture(String pth){
-  picturePath = pth;
+void Event::setPicture(int picSize, byte *pic){
+  Serial.print("Setting picture of length ");
+  Serial.println(picSize);
+  eventSize += 4 + picSize;
+  picture = pic;
 }
 
 byte Event::typeNumber(){
@@ -102,14 +105,12 @@ byte *Event::getBytes(){
   eType = eType << 4;
   data[0] = data[0] | eType;
 
-  // next 4 are for the picture type (0 for no picture)
+  // next 4 are for the picture type (0 for no picture, 1 for a JPEG)
   byte pType;
-  if (picturePath.length() == 0){
-      pType = 0;
-  }
-  else{
-    pType = 1;
-  }
+  if (picture != NULL)
+      pType = 1;
+  else
+    pType = 0;
   data[0] = data[0] | pType;
 
   // next 2 bytes represent the userID
@@ -120,6 +121,25 @@ byte *Event::getBytes(){
   data[3] = *sensorIDs;
 
   // The rest of the data represents the picture taken (if there was one)
+  if (picture != NULL){
+    int jpglen = eventSize - 8;
+
+    // The next 4 bytes are for the picture size
+    data[4] = (jpglen & 0xFF000000) >> 24;
+    data[5] = (jpglen & 0x00FF0000) >> 16;
+    data[6] = (jpglen & 0x0000FF00) >> 8;
+    data[7] = jpglen & 0x000000FF;
+
+    // The rest of the data contains the picture
+    byte* bytePtr = picture;
+    for (int i=0; i < jpglen; i++){
+      data[8 + i] = *bytePtr;
+      bytePtr++;
+    }
+
+    delete picture;
+    picture = NULL;
+  }
 
   return data;
 }
