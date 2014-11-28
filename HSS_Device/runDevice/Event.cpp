@@ -119,7 +119,6 @@ byte *Event::getBytes(){
 
   // next byte is for the sensor IDs
   data[3] = *sensorIDs;
-  Serial.println(data[3]);
 
   // The rest of the data represents the picture taken (if there was one)
 
