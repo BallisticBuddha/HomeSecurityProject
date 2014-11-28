@@ -148,8 +148,15 @@ int ServerConnector::sendEvent(byte* arr, int len, byte* pic){
 
   if (pType == 3 && eType == (arr[0] & 0x30) >> 4)
     acked = true;
-  else
+  else{
     Serial.println("Event was not acked before the server closed the connection.");
+    Serial.println("Bytes received:");
+    for (int i=0; i < recvLen; i++){
+      Serial.print(eventACK[i], BIN);
+      Serial.print(" ");
+    }
+    Serial.println("");
+  }
 
   ethClient.stop();
   ethClient.flush();
