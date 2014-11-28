@@ -68,9 +68,7 @@ int ServerConnector::authenticate(User u){
   }
 
   if (sizeof(u.userID) > 2){
-    for (int i=0; i < 2; i++){
-      u.userID = u.userID.substring(0,2);
-    }
+    u.userID = u.userID.substring(0,2);
   }
 
   String toSend = "uid:";

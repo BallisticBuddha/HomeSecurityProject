@@ -28,13 +28,16 @@ int eventPort = 8089;
 const int rPin = 3;
 const int gPin = 5;
 const int bPin = 6;
-const int s5Pin = 0;
 
 //Digital pin assignments
-const int s1Pin = 2;
-const int s2Pin = 7;
-const int s3Pin = 8;
-const int s4Pin = 9;
+const int s1Pin = 22;
+const int s2Pin = 23;
+const int s3Pin = 24;
+const int s4Pin = 25;
+const int s5Pin = 26;
+const int s6Pin = 27;
+const int s7Pin = 28;
+const int s8Pin = 29;
 
 //Device Variables
 const int cycleTime = 10; // 10 miliseconds
@@ -177,6 +180,9 @@ void setup(){
   pinMode(s3Pin, INPUT);
   pinMode(s4Pin, INPUT);
   pinMode(s5Pin, INPUT);
+  pinMode(s6Pin, INPUT);
+  pinMode(s7Pin, INPUT);
+  pinMode(s8Pin, INPUT);
 
 }
 
@@ -196,7 +202,8 @@ void loop(){
   }
 
   char key = keypad.getKey();
-  bool triggered[8] = {digitalRead(s1Pin), digitalRead(s2Pin), digitalRead(s3Pin), digitalRead(s4Pin),analogRead(s5Pin), 0, 0 ,0};
+  bool triggered[8] = {digitalRead(s1Pin), digitalRead(s2Pin), digitalRead(s3Pin), 
+    digitalRead(s4Pin), digitalRead(s5Pin), digitalRead(s6Pin), digitalRead(s7Pin), digitalRead(s8Pin)};
 
   switch(devState){
     case ALARMING:

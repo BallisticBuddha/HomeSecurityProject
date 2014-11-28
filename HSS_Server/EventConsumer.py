@@ -20,6 +20,7 @@ class EventConsumer(Server):
 
 		return bytes([resByte])
 
+
 	def consumeEvents(self):
 		while self.running:
 			self.sock.listen(0)
