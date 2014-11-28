@@ -100,7 +100,7 @@ int ServerConnector::authenticate(User u){
   }
 }
 
-int ServerConnector::sendEvent(byte *arr, int len){
+int ServerConnector::sendEvent(byte* arr, int len, byte* pic){
   int res = connectToEvent();
 
   if (!res){
@@ -108,6 +108,48 @@ int ServerConnector::sendEvent(byte *arr, int len){
   }
 
   ethClient.write(arr, len);
+
+  // The rest of the data contains the picture
+  if (len == 8){
+    int picSize = arr[4] << 24;
+    picSize = (arr[5] << 16) | picSize;
+    picSize = (arr[6] << 8) | picSize;
+    picSize = arr[7] | picSize;
+    Serial.print("Sending picture of size ");
+    Serial.println(picSize);
+
+    int buffSize = 1024;
+    int bytesLeft = picSize;
+    while (bytesLeft > 0){
+      int toSend = min(buffSize, bytesLeft);
+      ethClient.write(pic, toSend);
+      pic += toSend;
+      bytesLeft -= toSend;
+    }
+  }
+
+  // Wait for an ACK so we don't close the connection too early
+  bool acked = false;
+  byte* eventACK = new byte;
+  byte* iterPtr = eventACK;
+  unsigned int recvLen = 0;
+  while(ethClient.connected()){
+    if(ethClient.available()){
+      *iterPtr = ethClient.read();
+      iterPtr++;
+      recvLen++;
+    }
+  }
+
+  // The first 2 bits are the packet type (3 for event ACK)
+  int pType = eventACK[0] >> 6;
+  // The next 2 bits represent the type of event that was acked
+  int eType = (eventACK[0] & 0x30) >> 4;
+
+  if (pType == 3 && eType == (arr[0] & 0x30) >> 4)
+    acked = true;
+  else
+    Serial.println("Event was not acked before the server closed the connection.");
 
   ethClient.stop();
   ethClient.flush();

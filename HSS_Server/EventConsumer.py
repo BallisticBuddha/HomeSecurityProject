@@ -11,6 +11,24 @@ class EventConsumer(Server):
 		print("Event Consumer Server started...")
 		
 
+	def getACK(self, eType, seq = None):
+		ack = []
+		ack.append(3 << 6) # event ACK packet type
+		ack[0] = ack[0] | (eType << 4) # type of event acked
+		ack.extend([0 for _ in range(0,3)]) # add 3 bytes of padding
+
+		if isinstance(seq, int):
+			if seq <= 0xFFFFFFFF and seq >= 0:
+				ack.append(ack >> 24)
+				ack.append((ack & 0x00FF0000) >> 16)
+				ack.append((ack & 0x0000FF00) >> 8)
+				ack.append(ack & 0x000000FF)
+			else:
+				print("Invalid sequence number %i" % seq)
+
+		return bytes(ack)
+
+
 	def getHBResponse(self):
 		resByte = 1 << 6 # heartbeat packet type
 		resByte = resByte | (2 << 4) # response heartbeat type
@@ -34,8 +52,7 @@ class EventConsumer(Server):
 			while connAlive:
 				data = cSock.recv(self.buffSize)
 
-				for c in data:
-					event.append(c)
+				event.extend(data)
 
 				if (event[0] >> 6) == 1: # heartbeat message
 					connAlive = False
@@ -48,6 +65,9 @@ class EventConsumer(Server):
 					pictureSize = pictureSize | (event[5] << 16)
 					pictureSize = pictureSize | (event[6] << 8)
 					pictureSize = pictureSize | event[7]
+
+					print("pic size: %s" % pictureSize)
+					print("event length %i" % len(event))
 
 					if len(event) >= pictureSize + 8:
 						connAlive = False
@@ -65,6 +85,8 @@ class EventConsumer(Server):
 				pTypeStr = "HEARTBEAT"
 			elif packetType == 2:
 				pTypeStr = "EVENT"
+			elif packetType == 3:
+				pTypeStr = "EVENT ACK"
 			else:
 				pTypeStr = "INVALID"
 			print("Packet Type: %s" % pTypeStr)
@@ -75,6 +97,7 @@ class EventConsumer(Server):
 
 				if hbType == 1:
 					cSock.send(self.getHBResponse())
+					cSock.close()
 					hbTypeStr = "REQUEST"
 				elif hbType == 2:
 					hbTypeStr = "RESPONSE"
@@ -84,12 +107,8 @@ class EventConsumer(Server):
 				print("Heartbeat Type: %s" % hbTypeStr)
 
 				print("Heartbeat Message: %i" % hbMessage)
+			elif packetType == 2: # event
 
-			# This is (I think) the earliest we can close the socket
-			cSock.close()
-
-
-			if packetType == 2: # event
 				eventType = (event[0] & 0x30) >> 4
 				pictureType = event[0] & 0x0F
 				if event[1] == 0 and event[2] == 0:
@@ -110,11 +129,17 @@ class EventConsumer(Server):
 				sensors[6] = ((event[3] & 2) >> 1) == 1
 				sensors[7] = (event[3] & 1) == 1
 
+				#TODO: parse the sequence number here
+
+				# ACK the event
+				cSock.send(self.getACK(eventType))
+				cSock.close()
+
 				if pictureSize:
 					filename = "sample.jpg"
 					with open(filename, 'wb') as f:
 						for i in range(0, pictureSize - 1):
-							f.write(event[8 + i])
+							f.write(bytes([event[8 + i]]))
 
 				# Print event data to console
 

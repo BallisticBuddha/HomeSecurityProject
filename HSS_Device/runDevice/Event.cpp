@@ -6,7 +6,7 @@ Event::Event(EventType type){
   userID[1] = 0;
   sensorIDs = new byte;
   *sensorIDs = 0;
-  picture = NULL;
+  picSize = 0;
   eventSize = 4;
 }
 
@@ -63,13 +63,6 @@ void Event::setSensors(bool sensors[8]){
   }
 }
 
-void Event::setPicture(int picSize, byte *pic){
-  Serial.print("Setting picture of length ");
-  Serial.println(picSize);
-  eventSize += 4 + picSize;
-  picture = pic;
-}
-
 byte Event::typeNumber(){
   byte ret;
   switch(eventType){
@@ -89,13 +82,20 @@ byte Event::typeNumber(){
   return ret;
 }
 
+void Event::setPicture(int pSize){
+  Serial.print("Setting picture of length ");
+  Serial.println(pSize);
+
+  picSize = pSize;
+  eventSize += 4;
+}
+
 unsigned int Event::getEventSize(){
   return eventSize;
 }
 
-byte *Event::getBytes(){
+byte* Event::getBytes(){
   data = new byte[eventSize];
-
   // first 2 bits are packet type, 2 for event
   data[0] = 2;
   data[0] = data[0] << 6;
@@ -107,7 +107,7 @@ byte *Event::getBytes(){
 
   // next 4 are for the picture type (0 for no picture, 1 for a JPEG)
   byte pType;
-  if (picture != NULL)
+  if (picSize > 0)
       pType = 1;
   else
     pType = 0;
@@ -121,24 +121,13 @@ byte *Event::getBytes(){
   data[3] = *sensorIDs;
 
   // The rest of the data represents the picture taken (if there was one)
-  if (picture != NULL){
-    int jpglen = eventSize - 8;
+  if (picSize > 0){
 
     // The next 4 bytes are for the picture size
-    data[4] = (jpglen & 0xFF000000) >> 24;
-    data[5] = (jpglen & 0x00FF0000) >> 16;
-    data[6] = (jpglen & 0x0000FF00) >> 8;
-    data[7] = jpglen & 0x000000FF;
-
-    // The rest of the data contains the picture
-    byte* bytePtr = picture;
-    for (int i=0; i < jpglen; i++){
-      data[8 + i] = *bytePtr;
-      bytePtr++;
-    }
-
-    delete picture;
-    picture = NULL;
+    data[4] = (picSize & 0xFF000000) >> 24;
+    data[5] = (picSize & 0x00FF0000) >> 16;
+    data[6] = (picSize & 0x0000FF00) >> 8;
+    data[7] = picSize & 0x000000FF;
   }
 
   return data;

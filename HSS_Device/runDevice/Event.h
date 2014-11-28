@@ -13,7 +13,7 @@ class Event{
     EventType eventType;
     byte userID[2];
     byte* sensorIDs;
-    byte* picture;
+    int picSize;
     unsigned int eventSize;
     byte* data;
   
@@ -23,9 +23,9 @@ class Event{
     void setType(EventType et);
     void setUser(String userID);
     void setSensors(bool sensors[8]);
-    void setPicture(int picSize, byte *pic);
+    void setPicture(int pSize);
     unsigned int getEventSize();
-    byte *getBytes();
+    byte* getBytes();
     void freeData();
 
 };

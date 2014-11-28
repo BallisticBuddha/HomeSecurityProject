@@ -15,6 +15,7 @@
 // camera RX to TX1, no SoftwareSerial object is required:
 Adafruit_VC0706 cam = Adafruit_VC0706(&Serial1);
 int jpglen = 0;
+byte* pic = NULL;
 
 //Prepare I/O Expander for keypad
 byte rowPins[ROWS] = {0,1,2,3};
@@ -115,10 +116,14 @@ String toBinString(byte arr[], int arrSize){
 }
 
 int sendEvent(Event e){
-  //TODO: Send the event object to the server.
   Serial.println(toBinString(e.getBytes(), e.getEventSize()));
-  sConn.sendEvent(e.getBytes(), e.getEventSize());
+  sConn.sendEvent(e.getBytes(), e.getEventSize(), pic);
   e.freeData();
+  if (pic){
+    delete pic;
+    pic = NULL;
+    jpglen = 0;
+  }
   delete deviceEvent;
   deviceEvent = NULL;
   return 0;
@@ -171,7 +176,7 @@ int appendPasscodeString(char c){
   return 0;
 }
 
-byte* snapPicture(){
+void snapPicture(){
   if (!cam.takePicture()) 
     Serial.println("Failed to snap!");
   else 
@@ -180,16 +185,18 @@ byte* snapPicture(){
   // Get the size of the image (frame) taken  
   jpglen = cam.frameLength();
 
-  byte* pic = new byte[jpglen];
+  pic = new byte[jpglen];
 
-  for (int i=0; i < jpglen; i++){
+  int bytesLeft = jpglen;
+  while (bytesLeft > 0){
     uint8_t *buffer;
-    uint8_t bytesToRead = 1;
+    uint8_t bytesToRead = min(32, bytesLeft);
     buffer = cam.readPicture(bytesToRead);
-    pic[i] = *buffer;
+    for (int i=0; i < bytesToRead; i++){
+      pic[jpglen - bytesLeft] = *(buffer + i);
+      bytesLeft--;
+    }
   }
-
-  return pic;
 }
 
 void setup(){
@@ -254,26 +261,29 @@ void loop(){
   switch(devState){
     case ALARMING:
       if (key == 'D'){
-        byte* pic = snapPicture();
+        snapPicture();
         devState = WAITING_FOR_DISARM;
         waitCycleCount = 0;
         usernameInput = "";
         passcodeInput = "";
         deviceEvent = new Event(DISARM);
-        Event de = *deviceEvent;
-        de.setPicture(jpglen, pic);
+        deviceEvent->setPicture(jpglen);
+        //Event de = *deviceEvent;
+        //de.setPicture(jpglen);
       }
       break;
     case ARMED:
       if (triggered[0] || triggered[1] || triggered[2] || triggered[3] || triggered[4] || triggered[5] || triggered[6] || triggered[7]|| key == 'D'){
-        byte* pic = snapPicture();
+        snapPicture();
         devState = WAITING_FOR_DISARM;
         usernameInput = "";
         passcodeInput = "";
         deviceEvent = new Event(DISARM);
-        Event de = *deviceEvent;
-        de.setSensors(triggered);
-        de.setPicture(jpglen, pic);
+        deviceEvent->setSensors(triggered);
+        deviceEvent->setPicture(jpglen);
+        //Event de = *deviceEvent;
+        //de.setSensors(triggered);
+        //de.setPicture(jpglen);
       }
       break;
     case WAITING_TO_ARM:
@@ -299,9 +309,10 @@ void loop(){
           if (appendPasscodeString(key)){
             if (sConn.authenticate(deviceUser)){
               // Successful ARM event
-              Event de = *deviceEvent;
-              de.setUser(deviceUser.userID);
-              sendEvent(de);
+              deviceEvent->setUser(deviceUser.userID);
+              //Event de = *deviceEvent;
+              //de.setUser(deviceUser.userID);
+              sendEvent(*deviceEvent);
               
               devState = WAITING_TO_ARM;
               deviceUser.userID = "";
@@ -316,8 +327,8 @@ void loop(){
       }
       if (waitCycleCount >= cyclesToAlarm){
         // Failed ARM event
-        Event de = *deviceEvent;
-        sendEvent(de);
+        //Event de = *deviceEvent;
+        sendEvent(*deviceEvent);
 
         devState = DISARMED;
         deviceUser.userID = "";
@@ -334,9 +345,10 @@ void loop(){
           if (appendPasscodeString(key)){
             if (sConn.authenticate(deviceUser)){
               // Successful DISARM event
-              Event de = *deviceEvent;
-              de.setUser(deviceUser.userID);
-              sendEvent(de);
+              deviceEvent->setUser(deviceUser.userID);
+              //Event de = *deviceEvent;
+              //de.setUser(deviceUser.userID);
+              sendEvent(*deviceEvent);
 
               devState = DISARMED;
               deviceUser.userID = "";
@@ -352,9 +364,10 @@ void loop(){
       
       if (waitCycleCount >= cyclesToAlarm){
         // ALARM event
-        Event de = *deviceEvent;
-        de.setType(ALARM);
-        sendEvent(de);
+        deviceEvent->setType(ALARM);
+        //Event de = *deviceEvent;
+        //de.setType(ALARM);
+        sendEvent(*deviceEvent);
 
         devState = ALARMING;
         deviceUser.userID = "";

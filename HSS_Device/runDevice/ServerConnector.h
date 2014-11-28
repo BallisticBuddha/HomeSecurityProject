@@ -22,7 +22,7 @@ class ServerConnector{
     ServerConnector(EthernetClient eClient, byte *server, int aPort, int ePort);
     
     int authenticate(User u);
-    int sendEvent(byte *arr, int len);
+    int sendEvent(byte *arr, int len, byte* pic = NULL);
     bool sendHeartbeat();
       
 };
