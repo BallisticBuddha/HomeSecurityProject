@@ -59,8 +59,10 @@ EthernetClient client;
 ServerConnector sConn(client, server, authPort, eventPort);
 Keypad_I2C keypad = Keypad_I2C( makeKeymap(keys), rowPins, colPins, ROWS, COLS, i2caddress );
 
+//Persistant storage variables
 DeviceState devState;
 DeviceState prevState;
+unsigned long seqCounter;
 Event* deviceEvent;
 
 User deviceUser;
@@ -95,8 +97,8 @@ RGBColor getStateColor(DeviceState ds){
       break;
   }
   ret.red = fullColor >> 16;
-  ret.green = (fullColor & 0x00FF00) >> 8;
-  ret.blue = fullColor & 0x0000FF;
+  ret.green = (fullColor >> 8) & 0xFF;
+  ret.blue = fullColor & 0xFF;
   
   return ret;
 }
@@ -272,6 +274,7 @@ void setup(){
 
   loadEEPROM(DEVSTATE, devState);
   loadEEPROM(PREVSTATE, prevState);
+  loadEEPROM(SEQCOUNTER, seqCounter);
   loadEEPROM(EVENT, *deviceEvent);
 
   // Try to locate the camera
@@ -314,7 +317,8 @@ void loop(){
         waitCycleCount = 0;
         usernameInput = "";
         passcodeInput = "";
-        deviceEvent = new Event(DISARM);
+        deviceEvent = new Event(DISARM, seqCounter++);
+        storeEEPROM(SEQCOUNTER, seqCounter);
         deviceEvent->setPicture(jpglen);
         storeEEPROM(EVENT, *deviceEvent);
       }
@@ -326,7 +330,8 @@ void loop(){
         storeEEPROM(DEVSTATE, devState);
         usernameInput = "";
         passcodeInput = "";
-        deviceEvent = new Event(DISARM);
+        deviceEvent = new Event(DISARM, seqCounter++);
+        storeEEPROM(SEQCOUNTER, seqCounter);
         deviceEvent->setSensors(triggered);
         deviceEvent->setPicture(jpglen);
         storeEEPROM(EVENT, *deviceEvent);
@@ -346,7 +351,8 @@ void loop(){
         storeEEPROM(DEVSTATE, devState);
         usernameInput = "";
         passcodeInput = "";
-        deviceEvent = new Event(ARM);
+        deviceEvent = new Event(ARM, seqCounter++);
+        storeEEPROM(SEQCOUNTER, seqCounter);
         deviceEvent->setPicture(jpglen);
         storeEEPROM(EVENT, *deviceEvent);
       }

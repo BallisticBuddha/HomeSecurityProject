@@ -25,10 +25,10 @@ class EventConsumer(Server):
 
 		if isinstance(seq, int):
 			if seq <= 0xFFFFFFFF and seq >= 0:
-				ack.append(ack >> 24)
-				ack.append((ack & 0x00FF0000) >> 16)
-				ack.append((ack & 0x0000FF00) >> 8)
-				ack.append(ack & 0x000000FF)
+				ack.append(seq >> 24)
+				ack.append((seq & 0x00FF0000) >> 16)
+				ack.append((seq & 0x0000FF00) >> 8)
+				ack.append(seq & 0x000000FF)
 			else:
 				print("Invalid sequence number %i" % seq)
 
@@ -75,15 +75,15 @@ class EventConsumer(Server):
 						connAlive = False
 
 					if (event[0] & 0x0F) == 0: # no picture (should be exactly 4 bytes)
-						if len(event) >= 4:
+						if len(event) >= 8:
 							connAlive = False
-					elif len(event) >= 8:
-						pictureSize = event[4] << 24
-						pictureSize = pictureSize | (event[5] << 16)
-						pictureSize = pictureSize | (event[6] << 8)
-						pictureSize = pictureSize | event[7]
+					elif len(event) >= 12:
+						pictureSize = event[8] << 24
+						pictureSize = pictureSize | (event[9] << 16)
+						pictureSize = pictureSize | (event[10] << 8)
+						pictureSize = pictureSize | event[11]
 
-						if len(event) >= pictureSize + 8:
+						if len(event) >= pictureSize + 12:
 							connAlive = False
 
 				print("[Event Consumer] Packet received.")
@@ -144,16 +144,20 @@ class EventConsumer(Server):
 					sensors[7] = (event[3] & 1) == 1
 
 					#TODO: parse the sequence number here
+					seqNum = event[4] << 24
+					seqNum = seqNum | (event[5] << 16)
+					seqNum = seqNum | (event[6] << 8)
+					seqNum = seqNum | event[7]
 
 					# ACK the event
-					cSock.send(self.getACK(eventType))
+					cSock.send(self.getACK(eventType, seqNum))
 					cSock.close()
 
 					if pictureSize:
 						filename = self.getImageName()
 						with open(filename, 'wb') as f:
 							for i in range(0, pictureSize - 1):
-								f.write(bytes([event[8 + i]]))
+								f.write(bytes([event[12 + i]]))
 
 					# Print event data to console
 
@@ -176,6 +180,9 @@ class EventConsumer(Server):
 					print("Sensors Triggered:")
 					for i in range(0,len(sensors)):
 						print("\tSensor %i: %s" % (i + 1, sensors[i]))
+
+					# Sequence Number
+					print("Sequence Number: %i" % seqNum)
 
 					# Picture Type
 					if pictureType == 1:

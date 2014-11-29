@@ -12,6 +12,7 @@ enum DeviceState{
 enum EEPROMVariable{
   DEVSTATE,
   PREVSTATE,
+  SEQCOUNTER,
   EVENT
 };
 
@@ -44,7 +45,8 @@ const unsigned long wtaColor = 0xFFFF00; //yellow
 //They will remain in memory even when the device is off.
 const unsigned int devStateAddr = 0x00;
 const unsigned int prevStateAddr = 0x02;
-const unsigned int eventAddr = 0x04;
+const unsigned int seqCounterAddr = 0x04;
+const unsigned int eventAddr = 0x08;
 
 template <class T>
 int storeEEPROM (EEPROMVariable ev, const T& val){
@@ -55,6 +57,9 @@ int storeEEPROM (EEPROMVariable ev, const T& val){
       break;
     case PREVSTATE:
       addr = prevStateAddr;
+      break;
+    case SEQCOUNTER:
+      addr = seqCounterAddr;
       break;
     case EVENT:
       addr = eventAddr;
@@ -77,6 +82,9 @@ int loadEEPROM(EEPROMVariable ev, T& val){
       break;
     case PREVSTATE:
       addr = prevStateAddr;
+      break;
+    case SEQCOUNTER:
+      addr = seqCounterAddr;
       break;
     case EVENT:
       addr = eventAddr;

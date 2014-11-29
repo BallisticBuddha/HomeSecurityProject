@@ -116,16 +116,19 @@ bool ServerConnector::sendEvent(byte* arr, int len, byte* pic){
     return res;
   }
 
+  long seqNum = arr[4] << 24;
+  seqNum = (arr[5] << 16) | seqNum;
+  seqNum = (arr[6] << 8) | seqNum;
+  seqNum = arr[7] | seqNum;
+
   ethClient.write(arr, len);
 
   // The rest of the data contains the picture
-  if (len == 8){
-    int picSize = arr[4] << 24;
-    picSize = (arr[5] << 16) | picSize;
-    picSize = (arr[6] << 8) | picSize;
-    picSize = arr[7] | picSize;
-    Serial.print("Sending picture of size ");
-    Serial.println(picSize);
+  if (len == 12){
+    int picSize = arr[8] << 24;
+    picSize = (arr[9] << 16) | picSize;
+    picSize = (arr[10] << 8) | picSize;
+    picSize = arr[11] | picSize;
 
     int buffSize = 1024;
     int bytesLeft = picSize;
@@ -155,7 +158,15 @@ bool ServerConnector::sendEvent(byte* arr, int len, byte* pic){
   // The next 2 bits represent the type of event that was acked
   int eType = (eventACK[0] & 0x30) >> 4;
 
-  if (pType == 3 && eType == (arr[0] & 0x30) >> 4)
+  // The next 28 bits are padding
+
+  // The next 4 bytes are the sequence number that this is acking
+  long ackNum = eventACK[4] << 24;
+  ackNum = (eventACK[5] << 16) | ackNum;
+  ackNum = (eventACK[6] << 8) | ackNum;
+  ackNum = eventACK[7] | ackNum;
+
+  if (pType == 3 && eType == (arr[0] & 0x30) >> 4 && ackNum == seqNum)
     acked = true;
   else{
     Serial.println("Event was not acked before the server closed the connection.");

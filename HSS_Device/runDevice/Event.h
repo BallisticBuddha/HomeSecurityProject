@@ -19,7 +19,7 @@ class Event{
     byte* data;
   
   public:
-    Event(EventType type);
+    Event(EventType type, long seq);
     byte typeNumber();
     void setType(EventType et);
     void setUser(String userID);

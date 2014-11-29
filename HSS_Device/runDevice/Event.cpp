@@ -1,13 +1,14 @@
 #include "Event.h"
 
-Event::Event(EventType type){
+Event::Event(EventType type, long seq){
   eventType = type;
+  seqNum = seq;
   userID[0] = 0;
   userID[1] = 0;
   sensorIDs = new byte;
   *sensorIDs = 0;
   picSize = 0;
-  eventSize = 4;
+  eventSize = 8;
 }
 
 void Event::setType(EventType et){
@@ -121,14 +122,19 @@ byte* Event::getBytes(){
   // next byte is for the sensor IDs
   data[3] = *sensorIDs;
 
+  data[4] = seqNum >> 24;
+  data[5] = (seqNum >> 16) & 0xFF;
+  data[6] = (seqNum >> 8) & 0xFF;
+  data[7] = seqNum & 0xFF;
+
   // The rest of the data represents the picture taken (if there was one)
   if (picSize > 0){
 
     // The next 4 bytes are for the picture size
-    data[4] = (picSize & 0xFF000000) >> 24;
-    data[5] = (picSize & 0x00FF0000) >> 16;
-    data[6] = (picSize & 0x0000FF00) >> 8;
-    data[7] = picSize & 0x000000FF;
+    data[8] = picSize >> 24;
+    data[9] = (picSize >> 16) & 0xFF;
+    data[10] = (picSize >> 8) & 0xFF;
+    data[11] = picSize & 0xFF;
   }
 
   return data;
