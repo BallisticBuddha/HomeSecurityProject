@@ -109,7 +109,7 @@ int ServerConnector::authenticate(User u){
   }
 }
 
-bool ServerConnector::sendEvent(byte* arr, int len, byte* pic){
+bool ServerConnector::sendEvent(byte* arr, int len, Adafruit_VC0706 cam){
   int res = connectToEvent();
 
   if (!res){
@@ -130,17 +130,38 @@ bool ServerConnector::sendEvent(byte* arr, int len, byte* pic){
     picSize = (arr[10] << 8) | picSize;
     picSize = arr[11] | picSize;
 
-    int buffSize = 1024;
+    int camBuffSize = 64;
     int bytesLeft = picSize;
     while (bytesLeft > 0){
-      int toSend = min(buffSize, bytesLeft);
-      ethClient.write(pic, toSend);
-      pic += toSend;
+      int toSend = min(MSS, bytesLeft);
+      int bytesLeftInChunk = toSend;
+      byte* sendBuffer = new byte[toSend];
+      int offset = 0;
+      while (bytesLeftInChunk > 0){
+        int toRead = min(camBuffSize, bytesLeft);
+        memcpy(sendBuffer + offset, cam.readPicture(toRead), toRead);
+        offset += toRead;
+        bytesLeftInChunk -= toRead;
+      }
+      ethClient.write(sendBuffer, toSend);
+      delete sendBuffer;
       bytesLeft -= toSend;
     }
   }
 
   // Wait for an ACK so we don't close the connection too early
+  unsigned int cycleCount = 0;
+  while (!ethClient.available()){
+    delay(ackDelayCycle);
+    cycleCount++;
+
+    if (cycleCount >= ackTimeout){
+      break;
+    }
+  }
+
+  Serial.println(cycleCount);
+
   bool acked = false;
   byte* eventACK = new byte;
   byte* iterPtr = eventACK;
@@ -168,6 +189,11 @@ bool ServerConnector::sendEvent(byte* arr, int len, byte* pic){
 
   if (pType == 3 && eType == (arr[0] & 0x30) >> 4 && ackNum == seqNum)
     acked = true;
+  else if (cycleCount >= ackTimeout){
+    Serial.print("Connection timed out after ");
+    Serial.print((ackTimeout * ackDelayCycle) / 1000);
+    Serial.println(" seconds.");
+  }
   else{
     Serial.println("Event was not acked before the server closed the connection.");
     Serial.println("Bytes received:");

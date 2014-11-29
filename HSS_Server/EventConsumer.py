@@ -74,7 +74,7 @@ class EventConsumer(Server):
 					if (event[0] >> 6) == 1: # heartbeat message
 						connAlive = False
 
-					if (event[0] & 0x0F) == 0: # no picture (should be exactly 4 bytes)
+					if (event[0] & 0x0F) == 0: # no picture (should be exactly 8 bytes)
 						if len(event) >= 8:
 							connAlive = False
 					elif len(event) >= 12:
@@ -143,7 +143,6 @@ class EventConsumer(Server):
 					sensors[6] = ((event[3] & 2) >> 1) == 1
 					sensors[7] = (event[3] & 1) == 1
 
-					#TODO: parse the sequence number here
 					seqNum = event[4] << 24
 					seqNum = seqNum | (event[5] << 16)
 					seqNum = seqNum | (event[6] << 8)

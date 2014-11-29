@@ -16,7 +16,6 @@
 // camera RX to TX1, no SoftwareSerial object is required:
 Adafruit_VC0706 cam = Adafruit_VC0706(&Serial1);
 int jpglen = 0;
-byte* pic = NULL;
 
 //Prepare I/O Expander for keypad
 byte rowPins[ROWS] = {0,1,2,3};
@@ -121,11 +120,12 @@ String toBinString(byte arr[], int arrSize){
   return toRet;
 }
 
-int sendEvent(Event e){
+bool sendEvent(Event e){
+  bool res = false;
   //Serial.println(toBinString(e.getBytes(), e.getEventSize()));
   int attempts = 1;
   while (attempts <= maxTransmitAttempts){
-    if (!sConn.sendEvent(e.getBytes(), e.getEventSize(), pic)){
+    if (!sConn.sendEvent(e.getBytes(), e.getEventSize(), cam)){
       Serial.print("[Attempt #");
       Serial.print(attempts++);
       Serial.println("] Failed to send event to server.");
@@ -135,22 +135,26 @@ int sendEvent(Event e){
     delay(retransmitDelay);
   }
 
+  if (!cam.resumeVideo())
+    Serial.println("Failed to resume video.");
+  else
+    Serial.println("Resuming video.");  
+
   if (attempts > maxTransmitAttempts){
     Serial.print("Failed to send event after ");
-    Serial.print(attempts);
+    Serial.print(--attempts);
     Serial.println(" attempts, event was not logged!");
   }
+  else
+    res = true;
 
-  e.freeData();
-  if (pic){
-    delete pic;
-    pic = NULL;
+  if (jpglen > 0)
     jpglen = 0;
-  }
+  e.freeData();
   delete deviceEvent;
   deviceEvent = NULL;
   storeEEPROM(EVENT, *deviceEvent);
-  return 0;
+  return res;
 }
 
 void sendHeartbeat(){
@@ -228,31 +232,13 @@ int appendPasscodeString(char c){
 }
 
 void snapPicture(){
-  if (!cam.takePicture()) 
+  if (!cam.takePicture())
     Serial.println("Failed to snap!");
   else 
     Serial.println("Picture taken!");
 
   // Get the size of the image (frame) taken  
   jpglen = cam.frameLength();
-
-  pic = new byte[jpglen];
-
-  int bytesLeft = jpglen;
-  while (bytesLeft > 0){
-    uint8_t *buffer;
-    uint8_t bytesToRead = min(64, bytesLeft);
-    buffer = cam.readPicture(bytesToRead);
-    for (int i=0; i < bytesToRead; i++){
-      pic[jpglen - bytesLeft] = *(buffer + i);
-      bytesLeft--;
-    }
-  }
-
-  if (!cam.resumeVideo())
-    Serial.println("Failed to resume video.");
-  else
-    Serial.println("Resuming video.");
 }
 
 void setup(){
@@ -272,11 +258,19 @@ void setup(){
   Ethernet.begin(MAC, IP);
   keypad.begin();
 
+  // Reset EEPROMs to defaults if something goes terribly wrong
+
+  storeEEPROM(DEVSTATE, DISARMED);
+  storeEEPROM(PREVSTATE, DISARMED);
+  storeEEPROM(SEQCOUNTER, 0);
+  deviceEvent = NULL;
+  storeEEPROM(EVENT, *deviceEvent);
+
+
   loadEEPROM(DEVSTATE, devState);
   loadEEPROM(PREVSTATE, prevState);
   loadEEPROM(SEQCOUNTER, seqCounter);
   loadEEPROM(EVENT, *deviceEvent);
-
   // Try to locate the camera
   if (cam.begin()) {
     Serial.println("Camera Found:");
@@ -312,6 +306,8 @@ void loop(){
     case ALARMING:
       if (key == 'D'){
         snapPicture();
+        prevState = devState;
+        storeEEPROM(PREVSTATE, prevState);
         devState = WAITING_FOR_DISARM;
         storeEEPROM(DEVSTATE, devState);
         waitCycleCount = 0;
@@ -326,6 +322,8 @@ void loop(){
     case ARMED:
       if (triggered[0] || triggered[1] || triggered[2] || triggered[3] || triggered[4] || triggered[5] || triggered[6] || triggered[7]|| key == 'D'){
         snapPicture();
+        prevState = devState;
+        storeEEPROM(PREVSTATE, prevState);
         devState = WAITING_FOR_DISARM;
         storeEEPROM(DEVSTATE, devState);
         usernameInput = "";
@@ -339,6 +337,8 @@ void loop(){
       break;
     case WAITING_TO_ARM:
       if (waitCycleCount >= cyclesToAlarm){
+        prevState = devState;
+        storeEEPROM(PREVSTATE, prevState);
         devState = ARMED;
         storeEEPROM(DEVSTATE, devState);
         waitCycleCount = 0;
@@ -347,6 +347,8 @@ void loop(){
     case DISARMED:
       if (key == 'A'){
         snapPicture();
+        prevState = devState;
+        storeEEPROM(PREVSTATE, prevState);
         devState = WAITING_FOR_ARM;
         storeEEPROM(DEVSTATE, devState);
         usernameInput = "";
@@ -368,8 +370,10 @@ void loop(){
               // Successful ARM event
               deviceEvent->setUser(deviceUser.userID);
               storeEEPROM(EVENT, *deviceEvent);
-              sendEvent(*deviceEvent);
-              devState = WAITING_TO_ARM;
+              if (sendEvent(*deviceEvent))
+                devState = WAITING_TO_ARM;
+              else
+                devState = prevState;
               storeEEPROM(DEVSTATE, devState);
               deviceUser.userID = "";
               deviceUser.passcode = "";
@@ -383,8 +387,10 @@ void loop(){
       }
       if (waitCycleCount >= cyclesToAlarm){
         // Failed ARM event
-        sendEvent(*deviceEvent);
-        devState = DISARMED;
+        if (sendEvent(*deviceEvent))
+          devState = DISARMED;
+        else
+          devState = prevState;
         storeEEPROM(DEVSTATE, devState);
         deviceUser.userID = "";
         deviceUser.passcode = "";
@@ -402,8 +408,10 @@ void loop(){
               // Successful DISARM event
               deviceEvent->setUser(deviceUser.userID);
               storeEEPROM(EVENT, *deviceEvent);
-              sendEvent(*deviceEvent);
-              devState = DISARMED;
+              if (sendEvent(*deviceEvent))
+                devState = DISARMED;
+              else
+                devState = prevState;
               storeEEPROM(DEVSTATE, devState);
               deviceUser.userID = "";
               deviceUser.passcode = "";
@@ -420,8 +428,10 @@ void loop(){
         // ALARM event
         deviceEvent->setType(ALARM);
         storeEEPROM(EVENT, *deviceEvent);
-        sendEvent(*deviceEvent);
-        devState = ALARMING;
+        if (sendEvent(*deviceEvent))
+          devState = ALARMING;
+        else
+          devState = prevState;
         storeEEPROM(DEVSTATE, devState);
         deviceUser.userID = "";
         deviceUser.passcode = "";
