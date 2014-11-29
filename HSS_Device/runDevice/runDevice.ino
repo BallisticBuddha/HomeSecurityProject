@@ -45,6 +45,8 @@ const int s7Pin = 28;
 const int s8Pin = 29;
 
 //Device Variables
+const int maxTransmitAttempts = 5;
+const int retransmitDelay = 500; // 500 miliseconds
 const int cycleTime = 10; // 10 miliseconds
 const int cyclesPerHeartbeat = 500; // 5 seconds
 const int cyclesToAlarm = 1500; // 15 seconds
@@ -116,8 +118,25 @@ String toBinString(byte arr[], int arrSize){
 }
 
 int sendEvent(Event e){
-  Serial.println(toBinString(e.getBytes(), e.getEventSize()));
-  sConn.sendEvent(e.getBytes(), e.getEventSize(), pic);
+  //Serial.println(toBinString(e.getBytes(), e.getEventSize()));
+  int attempts = 1;
+  while (attempts <= maxTransmitAttempts){
+    if (!sConn.sendEvent(e.getBytes(), e.getEventSize(), pic)){
+      Serial.print("[Attempt #");
+      Serial.print(attempts++);
+      Serial.println("] Failed to send event to server.");
+    }
+    else
+      break;
+    delay(retransmitDelay);
+  }
+
+  if (attempts > maxTransmitAttempts){
+    Serial.print("Failed to send event after ");
+    Serial.print(attempts);
+    Serial.println(" attempts, event was not logged!");
+  }
+
   e.freeData();
   if (pic){
     delete pic;
@@ -127,6 +146,32 @@ int sendEvent(Event e){
   delete deviceEvent;
   deviceEvent = NULL;
   return 0;
+}
+
+void sendHeartbeat(){
+  int attempts = 1;
+  while (attempts <= maxTransmitAttempts){
+    if (!sConn.sendHeartbeat()){
+      Serial.print("[Attempt #");
+      Serial.print(attempts++);
+      Serial.println("] Failed to receive heartbeat response.");
+    }
+    else
+      break;
+    delay(retransmitDelay);
+  }
+
+  if (attempts > maxTransmitAttempts){
+    if (devState != DISABLED){
+      Serial.println("Server is unavailable or not responding, disabling device.");
+      prevState = devState;
+      devState = DISABLED;
+    }
+  }
+  else if(devState == DISABLED){
+    Serial.println("Server is responding again, enabling device.");
+    devState = prevState;
+  }
 }
 
 void lightUp(int flashing){
@@ -197,6 +242,11 @@ void snapPicture(){
       bytesLeft--;
     }
   }
+
+  if (!cam.resumeVideo())
+    Serial.println("Failed to resume video.");
+  else
+    Serial.println("Resuming video.");
 }
 
 void setup(){
@@ -240,19 +290,8 @@ void setup(){
 }
 
 void loop(){
-  if ((hbCycleCount % cyclesPerHeartbeat) == 0){
-    if (!sConn.sendHeartbeat()){
-      if (devState != DISABLED){
-        Serial.println("Server is unavailable or not responding, disabling device.");
-        prevState = devState;
-        devState = DISABLED;
-      }
-    }
-    else if(devState == DISABLED){
-      Serial.println("Server is responding again, enabling device.");
-      devState = prevState;
-    }
-  }
+  if ((hbCycleCount % cyclesPerHeartbeat) == 0)
+    sendHeartbeat();
 
   char key = keypad.getKey();
   bool triggered[8] = {digitalRead(s1Pin), digitalRead(s2Pin), digitalRead(s3Pin), 
@@ -294,10 +333,12 @@ void loop(){
       break;
     case DISARMED:
       if (key == 'A'){
+        snapPicture();
         devState = WAITING_FOR_ARM;
         usernameInput = "";
         passcodeInput = "";
         deviceEvent = new Event(ARM);
+        deviceEvent->setPicture(jpglen);
       }
       break;
     case WAITING_FOR_ARM:

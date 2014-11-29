@@ -11,6 +11,7 @@ class Event{
   
   private:
     EventType eventType;
+    long seqNum;
     byte userID[2];
     byte* sensorIDs;
     int picSize;

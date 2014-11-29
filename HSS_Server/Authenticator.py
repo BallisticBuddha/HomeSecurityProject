@@ -20,29 +20,33 @@ class Authenticator(Server):
 			connAlive = True
 			message = ""
 
-			while connAlive:
-				data = cSock.recv(self.buffSize)
+			try:
+				while connAlive:
+					data = cSock.recv(self.buffSize)
 
-				message += data.decode()
+					message += data.decode()
 
-				if data.decode() == '\n' or len(data) == 0:
-					connAlive = False
+					if data.decode() == '\n' or len(data) == 0:
+						connAlive = False
 
-			msgre = re.search("uid:([0-9]*),pass:([0-9]*)", message)
-			if not msgre or len(msgre.groups()) < 2:
-				print("[Authenticator] malformed authentication request recieved: \n%s" % message)
-			else:
-				user = msgre.group(1)
-				passcode = msgre.group(2)
-				userTup = (user, passcode)
-				if userTup in self.users:
-					print("[Authenticator] User %s successfully authenticated." % user)
-					cSock.send("success".encode())
+				msgre = re.search("uid:([0-9]*),pass:([0-9]*)", message)
+				if not msgre or len(msgre.groups()) < 2:
+					print("[Authenticator] malformed authentication request received: \n%s" % message)
 				else:
-					print("[Authenticator] Failed to authenticate user %s." % user)
-					cSock.send("fail".encode())
+					user = msgre.group(1)
+					passcode = msgre.group(2)
+					userTup = (user, passcode)
+					if userTup in self.users:
+						print("[Authenticator] User %s successfully authenticated." % user)
+						cSock.send("success".encode())
+					else:
+						print("[Authenticator] Failed to authenticate user %s." % user)
+						cSock.send("fail".encode())
 
-			cSock.close()
+				cSock.close()
+			except ConnectionResetError as e:
+				print("[Authenticator] Connection was reset, resuming to allow new connections.")
+				print("[Authenticator] Message received before reset: %s" % message)
 
 
 	def setUsers(self):

@@ -42,22 +42,34 @@ int ServerConnector::connectToEvent(bool quiet = false){
 
 bool ServerConnector::serverAlive(byte *hb){
   int packetType = (hb[0] & 0xC0) >> 6;
+  bool ret = false;
 
   if (packetType == 1){ // heartbeat packet
     int hbType = (hb[0] & 0x30) >> 4;
     if (hbType == 2){ // response packet
       int resMsg = hb[0] & 0x0F;
       if (resMsg == 1) // 1 means the server is alive
-        return true;
+        ret = true;
       else if (resMsg == 0) // 0 means the server has been set to no longer run
-        return false;
+        Serial.println("Server is responding as disabled.");
+      else{
+        Serial.print("Received an invalid server status of ");
+        Serial.println(resMsg);
+      }
     }
-    else
-      Serial.println("Received non-response packet from server.");
+    else{
+      Serial.print("Invalid heartbeat type (");
+      Serial.print(hbType);
+      Serial.println(") received for heartbeat.");
+    }
   }
-  else
-    Serial.println("Invalid packet type for heartbeat received.");
-  return false;
+  else{
+    Serial.print("Invalid packet type (");
+    Serial.print(packetType);
+    Serial.println(") received for heartbeat.");
+  }
+
+  return ret;
 }
 
 int ServerConnector::authenticate(User u){
@@ -100,7 +112,7 @@ int ServerConnector::authenticate(User u){
   }
 }
 
-int ServerConnector::sendEvent(byte* arr, int len, byte* pic){
+bool ServerConnector::sendEvent(byte* arr, int len, byte* pic){
   int res = connectToEvent();
 
   if (!res){
@@ -162,7 +174,7 @@ int ServerConnector::sendEvent(byte* arr, int len, byte* pic){
   ethClient.flush();
   Serial.println("Disconnected from event consumer server.");
   
-  return 1;
+  return acked;
 
 }
 
