@@ -87,7 +87,8 @@ void Event::setPicture(int pSize){
   Serial.println(pSize);
 
   picSize = pSize;
-  eventSize += 4;
+  if (pSize > 0)
+    eventSize += 4;
 }
 
 unsigned int Event::getEventSize(){

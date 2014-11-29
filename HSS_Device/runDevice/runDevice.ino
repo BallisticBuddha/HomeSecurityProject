@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <EEPROM.h>
 #include <Wire.h>
 #include "SPI.h"
 #include <Ethernet.h>
@@ -46,22 +47,23 @@ const int s8Pin = 29;
 
 //Device Variables
 const int maxTransmitAttempts = 5;
-const int retransmitDelay = 500; // 500 miliseconds
+const int retransmitDelay = 100; // 100 miliseconds
 const int cycleTime = 10; // 10 miliseconds
 const int cyclesPerHeartbeat = 500; // 5 seconds
 const int cyclesToAlarm = 1500; // 15 seconds
 //const int cyclesToAlarm = 500; // 5 seconds
+unsigned int waitCycleCount = 0;
+unsigned int hbCycleCount = 0;
 
 EthernetClient client;
 ServerConnector sConn(client, server, authPort, eventPort);
 Keypad_I2C keypad = Keypad_I2C( makeKeymap(keys), rowPins, colPins, ROWS, COLS, i2caddress );
-DeviceState devState = DISARMED;
-DeviceState prevState = devState;
-unsigned int waitCycleCount = 0;
-unsigned int hbCycleCount = 0;
+
+DeviceState devState;
+DeviceState prevState;
+Event* deviceEvent;
 
 User deviceUser;
-Event* deviceEvent = NULL;
 String usernameInput = "";
 String passcodeInput = "";
 
@@ -145,6 +147,7 @@ int sendEvent(Event e){
   }
   delete deviceEvent;
   deviceEvent = NULL;
+  storeEEPROM(EVENT, *deviceEvent);
   return 0;
 }
 
@@ -165,6 +168,7 @@ void sendHeartbeat(){
     if (devState != DISABLED){
       Serial.println("Server is unavailable or not responding, disabling device.");
       prevState = devState;
+      storeEEPROM(PREVSTATE, prevState);
       devState = DISABLED;
     }
   }
@@ -174,7 +178,7 @@ void sendHeartbeat(){
   }
 }
 
-void lightUp(int flashing){
+void lightUp(bool flashing){
   RGBColor color = getStateColor(devState);
 
   if (flashing){ // fading light
@@ -235,7 +239,7 @@ void snapPicture(){
   int bytesLeft = jpglen;
   while (bytesLeft > 0){
     uint8_t *buffer;
-    uint8_t bytesToRead = min(32, bytesLeft);
+    uint8_t bytesToRead = min(64, bytesLeft);
     buffer = cam.readPicture(bytesToRead);
     for (int i=0; i < bytesToRead; i++){
       pic[jpglen - bytesLeft] = *(buffer + i);
@@ -265,6 +269,10 @@ void setup(){
   Serial.begin(9600);
   Ethernet.begin(MAC, IP);
   keypad.begin();
+
+  loadEEPROM(DEVSTATE, devState);
+  loadEEPROM(PREVSTATE, prevState);
+  loadEEPROM(EVENT, *deviceEvent);
 
   // Try to locate the camera
   if (cam.begin()) {
@@ -302,32 +310,32 @@ void loop(){
       if (key == 'D'){
         snapPicture();
         devState = WAITING_FOR_DISARM;
+        storeEEPROM(DEVSTATE, devState);
         waitCycleCount = 0;
         usernameInput = "";
         passcodeInput = "";
         deviceEvent = new Event(DISARM);
         deviceEvent->setPicture(jpglen);
-        //Event de = *deviceEvent;
-        //de.setPicture(jpglen);
+        storeEEPROM(EVENT, *deviceEvent);
       }
       break;
     case ARMED:
       if (triggered[0] || triggered[1] || triggered[2] || triggered[3] || triggered[4] || triggered[5] || triggered[6] || triggered[7]|| key == 'D'){
         snapPicture();
         devState = WAITING_FOR_DISARM;
+        storeEEPROM(DEVSTATE, devState);
         usernameInput = "";
         passcodeInput = "";
         deviceEvent = new Event(DISARM);
         deviceEvent->setSensors(triggered);
         deviceEvent->setPicture(jpglen);
-        //Event de = *deviceEvent;
-        //de.setSensors(triggered);
-        //de.setPicture(jpglen);
+        storeEEPROM(EVENT, *deviceEvent);
       }
       break;
     case WAITING_TO_ARM:
       if (waitCycleCount >= cyclesToAlarm){
         devState = ARMED;
+        storeEEPROM(DEVSTATE, devState);
         waitCycleCount = 0;
       }
       break;
@@ -335,10 +343,12 @@ void loop(){
       if (key == 'A'){
         snapPicture();
         devState = WAITING_FOR_ARM;
+        storeEEPROM(DEVSTATE, devState);
         usernameInput = "";
         passcodeInput = "";
         deviceEvent = new Event(ARM);
         deviceEvent->setPicture(jpglen);
+        storeEEPROM(EVENT, *deviceEvent);
       }
       break;
     case WAITING_FOR_ARM:
@@ -351,11 +361,10 @@ void loop(){
             if (sConn.authenticate(deviceUser)){
               // Successful ARM event
               deviceEvent->setUser(deviceUser.userID);
-              //Event de = *deviceEvent;
-              //de.setUser(deviceUser.userID);
+              storeEEPROM(EVENT, *deviceEvent);
               sendEvent(*deviceEvent);
-              
               devState = WAITING_TO_ARM;
+              storeEEPROM(DEVSTATE, devState);
               deviceUser.userID = "";
               deviceUser.passcode = "";
             }
@@ -368,10 +377,9 @@ void loop(){
       }
       if (waitCycleCount >= cyclesToAlarm){
         // Failed ARM event
-        //Event de = *deviceEvent;
         sendEvent(*deviceEvent);
-
         devState = DISARMED;
+        storeEEPROM(DEVSTATE, devState);
         deviceUser.userID = "";
         deviceUser.passcode = "";
         waitCycleCount = 0;     
@@ -387,11 +395,10 @@ void loop(){
             if (sConn.authenticate(deviceUser)){
               // Successful DISARM event
               deviceEvent->setUser(deviceUser.userID);
-              //Event de = *deviceEvent;
-              //de.setUser(deviceUser.userID);
+              storeEEPROM(EVENT, *deviceEvent);
               sendEvent(*deviceEvent);
-
               devState = DISARMED;
+              storeEEPROM(DEVSTATE, devState);
               deviceUser.userID = "";
               deviceUser.passcode = "";
             }
@@ -406,11 +413,10 @@ void loop(){
       if (waitCycleCount >= cyclesToAlarm){
         // ALARM event
         deviceEvent->setType(ALARM);
-        //Event de = *deviceEvent;
-        //de.setType(ALARM);
+        storeEEPROM(EVENT, *deviceEvent);
         sendEvent(*deviceEvent);
-
         devState = ALARMING;
+        storeEEPROM(DEVSTATE, devState);
         deviceUser.userID = "";
         deviceUser.passcode = "";
         waitCycleCount = 0;     
@@ -421,11 +427,11 @@ void loop(){
   delay(cycleTime);
   hbCycleCount++;
   if (devState == WAITING_FOR_ARM || devState == WAITING_FOR_DISARM || devState == WAITING_TO_ARM || devState == ALARMING){
-    lightUp(1);
+    lightUp(true);
     waitCycleCount++;
   }
   else{
-    lightUp(0);
+    lightUp(false);
   }
 }
 

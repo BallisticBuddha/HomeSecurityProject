@@ -7,8 +7,6 @@ ServerConnector::ServerConnector(EthernetClient eClient, byte *server, int aPort
   }
   this->aPort = aPort;
   this->ePort = ePort;
-  authorizedUser.userID = "5";
-  authorizedUser.passcode = "1234";
 }
 
 int ServerConnector::connectToAuth(bool quiet = false){
@@ -38,7 +36,6 @@ int ServerConnector::connectToEvent(bool quiet = false){
 
   return result;
 }
-
 
 bool ServerConnector::serverAlive(byte *hb){
   int packetType = (hb[0] & 0xC0) >> 6;

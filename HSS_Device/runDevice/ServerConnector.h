@@ -9,7 +9,6 @@ struct User{
 class ServerConnector{
   
   private:
-    User authorizedUser;
     EthernetClient ethClient;
     byte sAddr[4];
     int aPort;
