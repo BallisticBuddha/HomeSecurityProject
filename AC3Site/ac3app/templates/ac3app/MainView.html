@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <title>AC3 Main View</title>
+      <link rel="SHORTCUT ICON" href="../../static/ac3app/images/AC3-logo.ico">
+	  <link rel="stylesheet" type="text/css" href="../../static/ac3app/stylesheets/MainView.css">
+      <script src="../../static/ac3app/jqplot/jquery.min.js"></script>
+      <script src="../../static/ac3app/scripts/jquery-2.1.1.min.js"></script>
+	  <script src="../../static/ac3app/jqplot/jquery.jqplot.min.js"></script>
+      <script src="../../static/ac3app/jqplot/jqplot.pieRenderer.min.js"></script>
+      <link href="../../static/ac3app/jqplot/jquery.jqplot.min.css" type="text/css" rel="stylesheet"/>
+	  <link rel="stylesheet" href="../../static/ac3app/ui/jquery-ui.css">
+	  <!--<script src="../../static/ac3app/ui/jquery-1.10.2.js"></script>-->
+	  <script src="../../static/ac3app/ui/jquery-ui.js"></script>
+	  <!--<link rel="stylesheet" href="../../static/ac3app/ui/style.css">-->
+      <script type="text/javascript" src="../../static/ac3app/scripts/MainView.js"></script>
+</head>
+
+<body bgcolor='#3488C4'>
+<form id="filter_form" action="return False">
+<table class="header" width="100%">
+<tr>
+<td><img src="../../static/ac3app/images/AC3-logo.png" align="left" style="width:100px;height:100px"></td>
+    {% if user.is_authenticated %}
+        <td align="center"><font size="8"><bold>Welcome <label>{{ user.username }}</label></bold></font></td>
+    {% else %}
+        <td align="center"><font size="8"><bold>Welcome Unknown User</bold></font></td>
+    {% endif %}
+    {% csrf_token %}
+    <td align="center">
+        {% if user.is_staff %}
+            <a class="button" href="{% url 'profile' %}">Edit Profiles</a>
+        {% else %}
+            <a class="button" href="{% url 'profile' %}">My Profile</a>
+        {% endif %}
+            <a class="button" href="{% url 'logout' %}">Log Out</a>
+    </td>
+</tr>
+</table>
+<center>
+<div>
+<div>
+<table id="eventTable" bgcolor="#EEC966" class="events" border="5px">
+<caption><bold><font size="5" color="blue">Events List</font></bold></caption>
+<tr id="tableHead"><th>ID</th><th>Event Type</th><th>Date</th><th>Time</th><th>UserID</th><th>Sensor Triggered</th><th>Picture</th></tr>
+<tbody id="tableBody">
+<!-- <tr><td>Hello</td><td>Hello</td><td>hello</td><td>Hello</td><td>Hello</td><td>Hello</td><td>Hello</td></tr>-->
+{% if latest_events %}
+    {% for event in latest_events %}
+        <tr>
+            <td>{{ event.id }}</td>
+            <td>{{ event.event_type.eventType_name }}</td>
+            <td>{{ event.date_created }}</td>
+            <td>{{ event.time_created }}</td>
+            <td>{{ event.user_id.user.username }}</td>
+            <td>{{ event.sensor_triggered.sensor_name }}</td>
+            {% if event.event_image.url != None %}
+            <td><a href="{{ event.event_image.url }}"
+                   onclick="window.open('{{ event.event_image.url }}', '{{ event.event_type.eventType_name }}',
+                           'width=300, height=250'); return false;">Image</a></td>
+            {% else %}
+            <td></td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+{% else %}
+    <tr><span>No events are available.</span></tr>
+{% endif %}
+</tbody>
+<div id="tableEvents"></div>
+</table>
+</div>
+<div class="filter" border="5px">
+<caption><font size="5" color="blue"><bold>Filter Events</bold></font></caption><br>
+    {% csrf_token %}
+UserName: {{ form.user_choices }}<br>
+Date1: <img src="../../static/ac3app/images/calendar.ico" style="width:30px;height:30px;vertical-align: text-bottom">{{ form.date1 }}
+<label style="margin-left:25px;margin-right:25px">To</label>	
+Date2: <img src="../../static/ac3app/images/calendar.ico" style="width:30px;height:30px;vertical-align: text-bottom">{{ form.date2 }}<br>
+<label id="Sensor">Triggered Sensor:</label>{{ form.sensor_choices }}
+<label style="margin-left:25px" for="Sensor">Event Type:</label>{{ form.event_choices }}
+<br>
+    <button id="filter_but" onclick="filterOnClick(); return false;">Filter</button>
+<!--<input type="submit" value="Filter" name="filter_sub">--><br>
+</div>
+
+<div style="display: table;">
+    <div style="display: table-row">
+        <div class="UserChart" id="eventactors"></div>
+		<div class="SensorChart" id="sensors"></div>
+    </div>
+</div>
+</center>
+</form>
+<input type="hidden" id="eventJSON" name="events" value="{{ latest_events_json }}" />
+</body>
+</html>

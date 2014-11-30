@@ -1,0 +1,99 @@
+.header{
+    border: 1px solid black;
+    outline-style: groove;
+    outline-color: #0033CC;
+	background-color: white;
+}
+
+.UserChart{
+	border: 6px solid black;
+	width: 400px;
+	height: 300px;
+	margin-left: 25%;
+	display: table-cell;
+}
+
+label{
+    color: green;
+}
+
+.SensorChart{
+	border: 6px solid black;
+	width: 400px;
+	height: 300px;
+	margin-left: 25%;
+	display: table-cell;
+}
+
+.events{
+	display: block;
+	height: 450px; 
+	float: left;
+	width: 400px;
+	margin-top: .1%;
+	font-size: 12px; 
+	overflow: auto;
+	border-collapse: collapse;
+	border: 4px solid black;
+}
+
+.filter{
+	border: 4px solid black;
+	background-color: white;
+	margin-top: 1%;
+}
+
+.jqplot-title{
+	color: black;
+	font-weight: bold;
+}
+
+.tableLoading {
+    opacity: 0.4;
+    position: absolute;
+    background: #000000 url("../images/ajax-loader-blackbackground.gif") no-repeat center;
+    width: 404px;
+    height: 455px;
+}
+
+/* EVERYTHING BELOW WILL CHANGE */
+table, th {
+    border: 1px solid black;
+	font-size: 140%;
+}
+
+th{
+	background-color: #907F68;
+}
+
+.button {
+   border-top: 1px solid #96d1f8;
+   background: #65a9d7;
+   background: -webkit-gradient(linear, left top, left bottom, from(#3e779d), to(#65a9d7));
+   background: -webkit-linear-gradient(top, #3e779d, #65a9d7);
+   background: -moz-linear-gradient(top, #3e779d, #65a9d7);
+   background: -ms-linear-gradient(top, #3e779d, #65a9d7);
+   background: -o-linear-gradient(top, #3e779d, #65a9d7);
+   padding: 5px 10px;
+   -webkit-border-radius: 8px;
+   -moz-border-radius: 8px;
+   border-radius: 8px;
+   -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+   -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
+   box-shadow: rgba(0,0,0,1) 0 1px 0;
+   text-shadow: rgba(0,0,0,.4) 0 1px 0;
+   color: white;
+   font-size: 14px;
+   font-family: Georgia, serif;
+   text-decoration: none;
+   vertical-align: middle;
+   }
+.button:hover {
+   border-top-color: #28597a;
+   background: #28597a;
+   color: #ccc;
+   }
+.button:active {
+   border-top-color: #1b435e;
+   background: #1b435e;
+   }
