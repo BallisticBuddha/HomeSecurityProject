@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <title>AC3 Profile</title>
+  <link rel="SHORTCUT ICON" href="../../static/ac3app/images/AC3-logo.ico">
+  <script src="../../static/ac3app/jqplot/jquery.min.js"></script>
+  <script src="../../static/ac3app/scripts/Profile.js"></script>
+  <link rel="stylesheet" type="text/css" href="../../static/ac3app/stylesheets/Profile.css">
+</head>
+<table class="header" width="100%">
+<tr>
+<td><img src="../../static/ac3app/images/AC3-logo.png" align="left" style="width:100px;height:100px"></td>
+    {% if user.is_authenticated %}
+        <td align="center"><font size="8"><bold>User: <label>{{ user.username }}</label></bold></font></td>
+    {% else %}
+        <td align="center"><font size="8"><bold>Welcome Unknown User</bold></font></td>
+    {% endif %}
+    <td align="center">
+        <a class="button" href="{% url 'main_view' %}">Main View</a>    <a class="button" href="{% url 'logout' %}">Logout</a>
+    </td>
+</tr>
+</table>
+<body bgcolor='#3488C4'>
+<form action='.' method="post">
+    {% csrf_token %}
+<Center>
+<div class="profile">
+<table>
+<caption><bold><font size="6" color="blue">Profile Information</font></bold></caption>
+<tr><td>User Name: </td><td>
+{% if user.is_staff %}
+    <select title="userselect" name="userselect" id="userselect" onchange="Userselect();">
+        <option value="{{ user.username }}" selected>{{ user.username }}</option>
+    {% for u in userslist %}
+        {% if u.username != user.username %}<option value="{{ u.username }}">{{ u.username }}</option>{% endif %}
+    {% endfor %}
+    </select>
+{% else %}
+    {{ user.username }}<input id="iusername" class="new" type="text" name="username"/>
+{% endif %}<input id="iusername" class="new" type="text" name="username"/></td></tr>
+<tr class="id"><td >User ID: </td><td id="id">{{ user.id }}</td></tr>
+<tr><td>Is Staff: </td><td id="isStaff">{{ user.is_staff }}</td></tr>
+<tr><td>First name: </td><td><label id="lfirst" class="info">{{ user.first_name }}</label><input id="ifirst" class="edit" type="text" name="firstname"/></td></tr>
+<tr><td>Last name: </td><td><label id="llast" class="info">{{ user.last_name }}</label><input id="ilast" class="edit" type="text" name="lastname"/></td></tr>
+<tr><td>User Pin: </td><td><label id="lpin" class="info">{{ userProfile.user_pin }}</label><input id="ipin" class="edit" type="text" name="userpin"/></td></tr>
+<tr><td>Password: </td><td id="pass">*******</td><td class="new"><input id="ipass" class="new" type="password" name="password"/></td></tr>
+<tr><td>Email: </td><td><label id="lemail" class="info">{{ user.email }}</label><input id="iemail" class="edit" type="text" name="email"/></td></tr>
+<tr><td>Phone Number: </td><td><label id="lphone" class="info">{{ userProfile.phone_number }}</label><input id="iphone" class="edit" type="text" name="phonenumber"/></td></tr>
+</table>
+<input id="name" type="text" name="name" value="{{ user.username }}"/>
+<div style="margin-top: 5%">
+    <a class="link" href="{% url 'new_password' %}">Passwords Resets</a><br>
+    <button class="info button" id="bEdit" onclick="return false">Edit</button>
+    {% if user.is_staff %}
+        <button class="info button" id="bNew" onclick="return false">Create User</button>
+        <button class="info button" id="bDelete" name="delete">Delete User</button>
+    {% endif %}
+    <input class="new button" type="submit" id="create" name="create" value="Submit User"/>
+    <input class="edit button" type="submit" id="save" name="save" value="Save Changes"/><button class="edit button" id="bCancel">Cancel</button>
+</div>
+</div>
+</Center>
+</form>
+</body>
+</html>
