@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" hash="990322375">
+    <data-source source="LOCAL" name="Django default" uuid="c9f3e1cf-66db-4457-95cb-8e4989fadeee">
+      <driver-ref>postgresql</driver-ref>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://127.0.0.1:5432/AC3siteDB</jdbc-url>
+      <user-name>AC3</user-name>
+      <user-password>dfcbdfc9df99</user-password>
+      <libraries />
+    </data-source>
+  </component>
+</project>
+
