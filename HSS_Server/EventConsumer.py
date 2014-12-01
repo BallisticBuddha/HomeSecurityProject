@@ -65,6 +65,7 @@ class EventConsumer(Server):
 			pictureSize = None
 			filename = None
 
+			timeStarted = datetime.now();
 			try:
 				while connAlive:
 					data = cSock.recv(self.buffSize)
@@ -94,6 +95,7 @@ class EventConsumer(Server):
 
 				# print common data to console
 				print("Time Received: %s" % str(timeReceived))
+				print("Transmission took %s seconds" % (timeReceived - timeStarted) )
 
 				if packetType == 1:
 					pTypeStr = "HEARTBEAT"

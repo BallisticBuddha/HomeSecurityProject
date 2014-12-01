@@ -259,13 +259,13 @@ void setup(){
   keypad.begin();
 
   // Reset EEPROMs to defaults if something goes terribly wrong
-
+/*
   storeEEPROM(DEVSTATE, DISARMED);
   storeEEPROM(PREVSTATE, DISARMED);
   storeEEPROM(SEQCOUNTER, 0);
   deviceEvent = NULL;
   storeEEPROM(EVENT, *deviceEvent);
-
+*/
 
   loadEEPROM(DEVSTATE, devState);
   loadEEPROM(PREVSTATE, prevState);
