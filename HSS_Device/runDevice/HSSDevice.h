@@ -93,8 +93,9 @@ int loadEEPROM(EEPROMVariable ev, T& val){
 
   byte* v = (byte*) (void*) &val;
   unsigned int i;
-  for (i = 0; i < sizeof(val); i++)
+  for (i = 0; i < sizeof(val); i++){
     *v++ = EEPROM.read(addr++);
+  }
 
   return i;
 

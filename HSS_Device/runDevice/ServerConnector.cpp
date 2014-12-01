@@ -7,6 +7,9 @@ ServerConnector::ServerConnector(EthernetClient eClient, byte *server, int aPort
   }
   this->aPort = aPort;
   this->ePort = ePort;
+  MSS = 1460;
+  ackDelayCycle = 100;
+  ackTimeout = 300; // 30 seconds
 }
 
 int ServerConnector::connectToAuth(bool quiet = false){

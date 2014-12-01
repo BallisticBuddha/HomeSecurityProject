@@ -262,18 +262,18 @@ void setup(){
   //pinMode(s8Pin, INPUT);
 
   // Reset EEPROMs to defaults if something goes terribly wrong
-
+/*
   storeEEPROM(DEVSTATE, DISARMED);
   storeEEPROM(PREVSTATE, DISARMED);
   storeEEPROM(SEQCOUNTER, 0);
   deviceEvent = NULL;
   storeEEPROM(EVENT, *deviceEvent);
-
+*/
 
   loadEEPROM(DEVSTATE, devState);
   loadEEPROM(PREVSTATE, prevState);
   loadEEPROM(SEQCOUNTER, seqCounter);
-  loadEEPROM(EVENT, *deviceEvent);
+  //loadEEPROM(EVENT, *deviceEvent);
   // Try to locate the camera
   if (cam.begin()) {
     Serial.println("Camera Found:");
