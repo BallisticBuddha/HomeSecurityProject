@@ -12,8 +12,8 @@
 #include "Event.h"
 
 // Prepare Camera
-// Using software serial on Uno
-SoftwareSerial cameraconnection = SoftwareSerial(2, 4);
+// Using software serial on Uno (camera Tx to pin 2, camera Rx to pin 7)
+SoftwareSerial cameraconnection = SoftwareSerial(2, 7);
 Adafruit_VC0706 cam = Adafruit_VC0706(&cameraconnection);
 int jpglen = 0;
 
@@ -35,9 +35,9 @@ const int gPin = 5;
 const int bPin = 6;
 
 //Digital pin assignments
-const int s1Pin = 7;
-const int s2Pin = 8;
-const int s3Pin = 9;
+const int s1Pin = 8;
+const int s2Pin = 9;
+//const int s3Pin = 24;
 //const int s4Pin = 25;
 //const int s5Pin = 26;
 //const int s6Pin = 27;
@@ -242,30 +242,33 @@ void snapPicture(){
 }
 
 void setup(){
+
+  Serial.begin(9600);
+  Ethernet.begin(MAC, IP);
+  keypad.begin();
+
+  Serial.println("Device Started!");
+
   pinMode(rPin, OUTPUT);
   pinMode(gPin, OUTPUT);
   pinMode(bPin, OUTPUT);
   pinMode(s1Pin, INPUT);
   pinMode(s2Pin, INPUT);
-  pinMode(s3Pin, INPUT);
+  //pinMode(s3Pin, INPUT);
   //pinMode(s4Pin, INPUT);
   //pinMode(s5Pin, INPUT);
   //pinMode(s6Pin, INPUT);
   //pinMode(s7Pin, INPUT);
   //pinMode(s8Pin, INPUT);
 
-  Serial.begin(9600);
-  Ethernet.begin(MAC, IP);
-  keypad.begin();
-
   // Reset EEPROMs to defaults if something goes terribly wrong
-/*
+
   storeEEPROM(DEVSTATE, DISARMED);
   storeEEPROM(PREVSTATE, DISARMED);
   storeEEPROM(SEQCOUNTER, 0);
   deviceEvent = NULL;
   storeEEPROM(EVENT, *deviceEvent);
-*/
+
 
   loadEEPROM(DEVSTATE, devState);
   loadEEPROM(PREVSTATE, prevState);
@@ -299,7 +302,7 @@ void loop(){
     sendHeartbeat();
 
   char key = keypad.getKey();
-  bool triggered[8] = {digitalRead(s1Pin), digitalRead(s2Pin), digitalRead(s3Pin), 
+  bool triggered[8] = {digitalRead(s1Pin), digitalRead(s2Pin), false, 
     false, false, false, false, false};
 
   switch(devState){
