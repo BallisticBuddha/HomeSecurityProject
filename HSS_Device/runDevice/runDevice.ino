@@ -12,9 +12,9 @@
 #include "Event.h"
 
 // Prepare Camera
-// Using hardware serial on Mega: camera TX conn. to RX1,
-// camera RX to TX1, no SoftwareSerial object is required:
-Adafruit_VC0706 cam = Adafruit_VC0706(&Serial1);
+// Using software serial on Uno
+SoftwareSerial cameraconnection = SoftwareSerial(2, 4);
+Adafruit_VC0706 cam = Adafruit_VC0706(&cameraconnection);
 int jpglen = 0;
 
 //Prepare I/O Expander for keypad
@@ -35,14 +35,14 @@ const int gPin = 5;
 const int bPin = 6;
 
 //Digital pin assignments
-const int s1Pin = 22;
-const int s2Pin = 23;
-const int s3Pin = 24;
-const int s4Pin = 25;
-const int s5Pin = 26;
-const int s6Pin = 27;
-const int s7Pin = 28;
-const int s8Pin = 29;
+const int s1Pin = 7;
+const int s2Pin = 8;
+const int s3Pin = 9;
+//const int s4Pin = 25;
+//const int s5Pin = 26;
+//const int s6Pin = 27;
+//const int s7Pin = 28;
+//const int s8Pin = 29;
 
 //Device Variables
 const int maxTransmitAttempts = 5;
@@ -248,11 +248,11 @@ void setup(){
   pinMode(s1Pin, INPUT);
   pinMode(s2Pin, INPUT);
   pinMode(s3Pin, INPUT);
-  pinMode(s4Pin, INPUT);
-  pinMode(s5Pin, INPUT);
-  pinMode(s6Pin, INPUT);
-  pinMode(s7Pin, INPUT);
-  pinMode(s8Pin, INPUT);
+  //pinMode(s4Pin, INPUT);
+  //pinMode(s5Pin, INPUT);
+  //pinMode(s6Pin, INPUT);
+  //pinMode(s7Pin, INPUT);
+  //pinMode(s8Pin, INPUT);
 
   Serial.begin(9600);
   Ethernet.begin(MAC, IP);
@@ -300,7 +300,7 @@ void loop(){
 
   char key = keypad.getKey();
   bool triggered[8] = {digitalRead(s1Pin), digitalRead(s2Pin), digitalRead(s3Pin), 
-    digitalRead(s4Pin), digitalRead(s5Pin), digitalRead(s6Pin), digitalRead(s7Pin), digitalRead(s8Pin)};
+    false, false, false, false, false};
 
   switch(devState){
     case ALARMING:
