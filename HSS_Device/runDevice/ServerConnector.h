@@ -11,9 +11,9 @@ class ServerConnector{
   
   private:
     EthernetClient ethClient;
-    const int MSS = 1460;
-    const int ackDelayCycle = 100;
-    const int ackTimeout = 300; // 30 seconds
+    int MSS;
+    int ackDelayCycle;
+    int ackTimeout;
     byte sAddr[4];
     int aPort;
     int ePort;

@@ -25,7 +25,7 @@ int i2caddress = 0x20;
 //Prepare for network connectivity 
 byte MAC[] = {0x1C , 0x02, 0x75, 0xBD, 0xDC, 0x44};
 byte IP[] = {192, 168, 1, 48};
-byte server[] = {192, 168, 1, 106};
+byte server[] = {192, 168, 1, 49};
 int authPort = 8088;
 int eventPort = 8089;
 
