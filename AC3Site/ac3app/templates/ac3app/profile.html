@@ -1,15 +1,16 @@
 <!DOCTYPE html>
+
 <html>
 <head lang="en">
   <title>AC3 Profile</title>
-  <link rel="SHORTCUT ICON" href="../../static/ac3app/images/AC3-logo.ico">
-  <script src="../../static/ac3app/jqplot/jquery.min.js"></script>
-  <script src="../../static/ac3app/scripts/Profile.js"></script>
-  <link rel="stylesheet" type="text/css" href="../../static/ac3app/stylesheets/Profile.css">
+  <link rel="SHORTCUT ICON" href="{{ STATIC_URL }}ac3app/images/AC3-logo.ico">
+  <script src="{{ STATIC_URL }}ac3app/jqplot/jquery.min.js"></script>
+  <script src="{{ STATIC_URL }}ac3app/scripts/Profile.js"></script>
+  <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}ac3app/stylesheets/Profile.css">
 </head>
 <table class="header" width="100%">
 <tr>
-<td><img src="../../static/ac3app/images/AC3-logo.png" align="left" style="width:100px;height:100px"></td>
+<td><img src="{{ STATIC_URL }}ac3app/images/AC3-logo.png" align="left" style="width:100px;height:100px"></td>
     {% if user.is_authenticated %}
         <td align="center"><font size="8"><bold>User: <label>{{ user.username }}</label></bold></font></td>
     {% else %}
