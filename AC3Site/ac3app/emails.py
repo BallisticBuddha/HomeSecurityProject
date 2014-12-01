@@ -15,7 +15,8 @@ def forgot_password_email(request):
             u = None
 
         if u is not None:
-            tempPass = BaseUserManager.make_random_password(u)
+            bum = BaseUserManager()
+            tempPass = bum.make_random_password()
             u.set_password(tempPass)
             userProfile.hasTempPassword = True
             userProfile.save()
