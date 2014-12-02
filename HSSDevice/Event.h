@@ -12,7 +12,7 @@ class Event{
   private:
     EventType eventType;
     long seqNum;
-    byte userID[2];
+    unsigned int userID;
     byte* sensorIDs;
     int picSize;
     unsigned int eventSize;
@@ -22,7 +22,7 @@ class Event{
     Event(EventType type, long seq);
     byte typeNumber();
     void setType(EventType et);
-    void setUser(String userID);
+    void setUser(unsigned int uid);
     void setSensors(bool sensors[8]);
     void setPicture(int pSize);
     unsigned int getEventSize();

@@ -10,8 +10,8 @@ class Event(object):
 
         self.eventType = eType
         self.started = conStartTime
-        self.dateReceived = timeRecvd.date
-        self.timeReceived= timeRecvd.time
+        self.dateReceived = timeRecvd.date()
+        self.timeReceived= timeRecvd.time()
         self.seqNum = seq
         self.sensor = None
         self.user = None
@@ -37,20 +37,20 @@ class Event(object):
         else:
             pFmt = "INVALID"
 
-        received = self.dateReceived + self.timeReceived
-        duration = created - self.started
+        received = datetime.combine(self.dateReceived, self.timeReceived)
+        duration = received - self.started
 
         ret = """[Event Consumer] Event received. Transmission took %s seconds.
         \tTime Received: %s
         \tSequence Number: %i
         \tEvent Type: %s
-        \tUserID: %i
+        \tUserID: %s
         \tSensor Triggered: %s
-        \tPicture Format: %s""" % (str(duration), str(received), self.seq, etStr, 
-            self.user, self.sensor, pFmt)
+        \tPicture Format: %s""" % (str(duration), str(received), self.seqNum, etStr, 
+            str(self.user), str(self.sensor), pFmt)
         if self.imgType:
             ret += "\n\tPicture Size: %s bytes" % self.imgSize
-            ret ++ "\n\tPicture Location: %s" % self.imgPath
+            ret += "\n\tPicture Location: %s" % self.imgPath
 
         return ret
 
@@ -67,7 +67,8 @@ class Event(object):
 
 
     def setUser(self, uid):
-        self.user = int(uid)
+        if uid > 0: # 0 is not a valid userid
+            self.user = uid
 
 
     def setImage(self, iType, iSize, iPath):
@@ -77,11 +78,8 @@ class Event(object):
 
 
     def storeEvent(self):
-        cols = ["date_created", "time_created", 
-            "event_type_id", "sensor_triggered_id", "user_id_id", "event_image"]
-
         with self.psql as cursor:
-            cursor.execute("INSERT INTO ac3app_event VALUES (%s, %s, %i, %i, %i, %s)" %\
-             (self.eventType, self.dateCreated, self.timeCreated, self.sensor, self.user, 
-             self.imgPath))
+            cursor.execute("INSERT INTO ac3app_event (date_created, time_created, event_type_id, \
+                sensor_triggered_id, user_id_id, event_image) VALUES (%s , %s, %s, %s, %s, %s)", 
+                (self.dateReceived, self.timeReceived, self.eventType, self.sensor, self.user, self.imgPath))
 

@@ -1,6 +1,9 @@
 #!/usr/bin/python3
 
 import re
+import errno
+from socket import error as sock_error
+
 from Server import Server
 from PSQL import PSQLConn
 
@@ -10,8 +13,21 @@ class Authenticator(Server):
         Server.__init__(self, sAddr, sPort, buffSize)
         self.running = True
         self.psql = PSQLConn()
-        self.msgre = re.compile("uid:([0-9]*),pass:([0-9]*)")
         print("Authentication Server started...")
+
+
+    def getAuthResponse(self, success, token):
+        resPkt = []
+
+        resPkt.append(0) # Auth Packet
+        resPkt[0] = resPkt[0] | 2 << 4 # Response
+        if success:
+            resPkt[0] = resPkt[0] | 1
+        resPkt.append(token >> 16)
+        resPkt.append((token >> 8) & 0xFF)
+        resPkt.append(token & 0xFF)
+
+        return bytes(resPkt)
 
 
     def listenForAuth(self):
@@ -20,49 +36,74 @@ class Authenticator(Server):
             cSock, cAddr = self.sock.accept()
             print("[Authenticator] Accepted connection from %s." % str(cAddr))
             connAlive = True
-            message = ""
+            authPkt = []
 
             try:
                 while connAlive:
                     data = cSock.recv(self.buffSize)
 
-                    message += data.decode()
+                    authPkt.extend(data)
 
-                    if data.decode() == '\n' or len(data) == 0:
+                    print(authPkt)
+
+                    if (authPkt[0] >> 6) == 0: # Authentication packet
+                        if (authPkt[0] >> 4) & 0x30 == 1: # Auth request
+                            if len(authPkt >= 8):
+                                connAlive = False
+                        else:
+                            connAlive = False
+                    else:
                         connAlive = False
 
-                reRes = self.msgre.search(message)
-                if not reRes or len(reRes.groups()) < 2:
-                    print("[Authenticator] malformed authentication request received: \n%s" % message)
-                else:
-                    userID = authorized(reRes.group(1), reRes.group(2))
-                    if userID:
-                        print("[Authenticator] %s was successfully authenticated." % getUsername(userID))
-                        cSock.send("success".encode())
+                pktType = authPkt[0] >> 6
+                direction = (authPkt[0] >> 4) & 0x0F
+                message = authPkt[0] & 0x0F
+
+                if pktType == 0 and len(authPkt) >= 8:
+                    token = authPkt[1] << 16
+                    token = token | (authPkt[2] << 8)
+                    token = token | authPkt[3]
+
+                    if direction == 1: 
+                        user = authPkt[4] << 8
+                        user = user | authPkt[5]
+
+                        passcode = authPkt[6] << 8
+                        passcode = passcode | authPkt[7]
+
+                        result = self.authorized(user, passcode)
+                        response = self.getAuthResponse(result, token)
+                        cSock.send(response)
+                        if result: 
+                           print("[Authenticator] %s was successfully authenticated." % self.getUsername(result))
+                        else:
+                            print("[Authenticator] Failed to authenticate user with ID %s." % user)
                     else:
-                        print("[Authenticator] Failed to authenticate user with ID %s." % reRes.group(1))
-                        cSock.send("fail".encode())
+                        print("[Authenticator] Recieved response packet.")
+                else:
+                    print("[Authenticator] message too small or of wrong type.")
+
 
                 cSock.close()
-            except ConnectionResetError as e:
-                print("[Authenticator] Connection was reset, resuming to allow new connections.")
-                print("[Authenticator] Message received before reset: %s" % message)
+            except sock_error as err:
+                if err.errno != errno.ECONNRESET:
+                    print("[Event Consumer] An unexpected socket error occured.")
+                    print(err.message)
+                else:
+                    print("[Authenticator] Connection was reset, resuming to allow new connections.")
+                    print("[Authenticator] Message received before reset: %s" % message)
 
 
     def authorized(self, userID, passcode):
         ret = None
 
-        try:
-            userID = int(userID)
-            passcode = int(passcode)
+        if userID > 0:
             with self.psql as cursor:
                 cursor.execute("SELECT id, user_pin FROM ac3app_userprofile WHERE (user_id = %s)" % userID)
                 resTup = cursor.fetchone()
 
                 if resTup and resTup[1] == passcode:
                     ret = resTup[0]
-        except ValueError as e:
-            print("[Authenticator] The received userID or passcode was not an integer.")
 
         return ret
 

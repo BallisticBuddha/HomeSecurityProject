@@ -209,7 +209,7 @@ void lightUp(bool flashing){
 
 int appendUserString(char c){
   if (c == '*'){
-    deviceUser.userID = usernameInput;
+    deviceUser.userID = usernameInput.toInt();
     usernameInput = "";
     return 1;
   }
@@ -221,7 +221,7 @@ int appendUserString(char c){
 
 int appendPasscodeString(char c){
   if (c == '#'){
-    deviceUser.passcode = passcodeInput;
+    deviceUser.passcode = passcodeInput.toInt();
     passcodeInput = "";
     return 1;
   }
@@ -259,18 +259,19 @@ void setup(){
   keypad.begin();
 
   // Reset EEPROMs to defaults if something goes terribly wrong
-/*
+
   storeEEPROM(DEVSTATE, DISARMED);
   storeEEPROM(PREVSTATE, DISARMED);
   storeEEPROM(SEQCOUNTER, 0);
   deviceEvent = NULL;
   storeEEPROM(EVENT, *deviceEvent);
-*/
+
 
   loadEEPROM(DEVSTATE, devState);
   loadEEPROM(PREVSTATE, prevState);
   loadEEPROM(SEQCOUNTER, seqCounter);
   loadEEPROM(EVENT, *deviceEvent);
+
   // Try to locate the camera
   if (cam.begin()) {
     Serial.println("Camera Found:");
@@ -361,7 +362,7 @@ void loop(){
       break;
     case WAITING_FOR_ARM:
       if (key){
-        if (deviceUser.userID.length() == 0){
+        if (deviceUser.userID == 0){
           appendUserString(key);
         }
         else{
@@ -375,12 +376,12 @@ void loop(){
               else
                 devState = prevState;
               storeEEPROM(DEVSTATE, devState);
-              deviceUser.userID = "";
-              deviceUser.passcode = "";
+              deviceUser.userID = 0;
+              deviceUser.passcode = 0;
             }
             else{
-              deviceUser.userID = "";
-              deviceUser.passcode = "";
+              deviceUser.userID = 0;
+              deviceUser.passcode = 0;
             }
           }
         }
@@ -392,14 +393,14 @@ void loop(){
         else
           devState = prevState;
         storeEEPROM(DEVSTATE, devState);
-        deviceUser.userID = "";
-        deviceUser.passcode = "";
+        deviceUser.userID = 0;
+        deviceUser.passcode = 0;
         waitCycleCount = 0;     
       }
       break;
     case WAITING_FOR_DISARM:
       if (key){
-        if (deviceUser.userID.length() == 0){
+        if (deviceUser.userID == 0){
           appendUserString(key);
         }
         else{
@@ -413,12 +414,12 @@ void loop(){
               else
                 devState = prevState;
               storeEEPROM(DEVSTATE, devState);
-              deviceUser.userID = "";
-              deviceUser.passcode = "";
+              deviceUser.userID = 0;
+              deviceUser.passcode = 0;
             }
             else{
-              deviceUser.userID = "";
-              deviceUser.passcode = "";
+              deviceUser.userID = 0;
+              deviceUser.passcode = 0;
             }
           }
         }
@@ -433,8 +434,8 @@ void loop(){
         else
           devState = prevState;
         storeEEPROM(DEVSTATE, devState);
-        deviceUser.userID = "";
-        deviceUser.passcode = "";
+        deviceUser.userID = 0;
+        deviceUser.passcode = 0;
         waitCycleCount = 0;     
       }
       break;

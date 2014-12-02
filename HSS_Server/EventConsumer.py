@@ -1,7 +1,9 @@
 #!/usr/bin python
 
 import os
+import errno
 from datetime import datetime
+from socket import error as sock_error
 
 from Server import Server
 from Event import Event
@@ -60,7 +62,7 @@ class EventConsumer(Server):
 		while self.running:
 			self.sock.listen(0)
 			cSock, cAddr = self.sock.accept()
-			print("[Event Consumer] Accepted connection from %s." % str(cAddr))
+			#print("[Event Consumer] Accepted connection from %s." % str(cAddr))
 			connAlive = True
 			event = []
 			pictureSize = None
@@ -110,18 +112,14 @@ class EventConsumer(Server):
 					seqNum = seqNum | (event[6] << 8)
 					seqNum = seqNum | event[7]
 
-					# this is (I think) the earliest we can ACK the evnet
+					# this is (I think) the earliest we can ACK the event
 					cSock.send(self.getACK(eventType, seqNum))
 					cSock.close()
 
 					e = Event(eventType, timeStarted, timeReceived, seqNum)
 
-					if event[1] == 0 and event[2] == 0:
-						userID = None
-					elif event[1] == 0:
-						userID = chr(event[2])
-					else:
-						userID = chr(event[1]) + chr(event[2])
+					userID = event[1] >> 8
+					userID = userID | (event[2] & 0x0FF)
 					e.setUser(userID)
 
 					sensors = [ False for _ in range(0,8) ]
@@ -148,9 +146,13 @@ class EventConsumer(Server):
 					print(e)
 
 
-			except ConnectionResetError as e:
-				print("[Event Consumer] Connection was reset, resuming to allow new connections.")
-				print("[Event Consumer] %i bytes received before reset." % len(event))
+			except sock_error as err:
+				if err.errno != errno.ECONNRESET:
+					print("[Event Consumer] An unexpected socket error occured.")
+					print(err.message)
+				else:
+					print("[Event Consumer] Connection was reset, resuming to allow new connections.")
+					print("[Event Consumer] %i bytes received before reset." % len(event))
 
 
 
