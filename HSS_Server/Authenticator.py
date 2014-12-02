@@ -44,8 +44,6 @@ class Authenticator(Server):
 
                     authPkt.extend(data)
 
-                    print(authPkt)
-
                     if (authPkt[0] >> 6) == 0: # Authentication packet
                         if (authPkt[0] >> 4) & 0x30 == 1: # Auth request
                             if len(authPkt >= 8):
@@ -99,7 +97,7 @@ class Authenticator(Server):
 
         if userID > 0:
             with self.psql as cursor:
-                cursor.execute("SELECT id, user_pin FROM ac3app_userprofile WHERE (user_id = %s)" % userID)
+                cursor.execute("SELECT user_id, user_pin FROM ac3app_userprofile WHERE (user_id = %s)", (userID,))
                 resTup = cursor.fetchone()
 
                 if resTup and resTup[1] == passcode:
@@ -111,17 +109,13 @@ class Authenticator(Server):
     def getUsername(self, userID):
         ret = None
 
-        try:
-            userID = int(userID)
-            with self.psql as cursor:
-                cursor.execute("SELECT username FROM auth_user WHERE (id = %s)" % userID)
-                resTup = cursor.fetchone()
+        userID = userID
+        with self.psql as cursor:
+            cursor.execute("SELECT username FROM auth_user WHERE (id = %s)", (userID,))
+            resTup = cursor.fetchone()
 
-                if resTup and resTup[0]:
-                    ret = resTup[0]
-
-        except ValueError as e:
-            print("[Authenticator] Cannot get username of non-integer userID.")
+            if resTup and resTup[0]:
+                ret = resTup[0]
 
         return ret
 

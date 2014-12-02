@@ -13,9 +13,9 @@ class EventConsumer(Server):
 	def __init__(self, sAddr='127.0.0.1', sPort=8089, buffSize=1024):
 		Server.__init__(self, sAddr, sPort, buffSize)
 		self.running = True
-		self.picLib = os.getcwd() + "/images/"
-		if not os.path.isdir(self.picLib):
-			os.makedirs(self.picLib)
+		self.mediaDir = "media/"
+		if not os.path.isdir(self.mediaDir):
+			os.makedirs(self.mediaDir)
 
 		print("Event Consumer Server started...")
 		
@@ -52,10 +52,10 @@ class EventConsumer(Server):
 		filename = ""
 		for i in range(0, 10000):
 			filename = "img%04d.jpg" % i
-			if not os.path.exists(self.picLib + filename):
+			if not os.path.exists(self.mediaDir + filename):
 				break
 
-		return self.picLib + filename
+		return filename
 
 
 	def consumeEvents(self):
@@ -136,7 +136,7 @@ class EventConsumer(Server):
 					pictureType = event[0] & 0x0F
 					if pictureSize:
 						filename = self.getImageName()
-						with open(filename, 'wb') as f:
+						with open(self.mediaDir + filename, 'wb') as f:
 							for i in range(0, pictureSize - 1):
 								f.write(bytes([event[12 + i]]))
 						e.setImage(pictureType, pictureSize, filename)
