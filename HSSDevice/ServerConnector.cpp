@@ -106,6 +106,16 @@ bool ServerConnector::authenticate(User u){
 
   delete authReq;
 
+  // Wait for an ACK so we don't close the connection too early
+  unsigned int cycleCount = 0;
+  while (!ethClient.available()){
+    delay(ackDelayCycle);
+    cycleCount++;
+    if (cycleCount >= (ackTimeout / 4)){
+      break;
+    }
+  } 
+
   // Now we get the response
   bool success = false;
   byte* authRes = new byte[4];
@@ -129,8 +139,20 @@ bool ServerConnector::authenticate(User u){
     recvToken = recvToken | (authRes[2] << 8);
     recvToken = recvToken | authRes[3];
 
+    Serial.println("Auth report");
+    Serial.println(pType);
+    Serial.println(direction);
+    Serial.println(replyMsg);
+    Serial.println(sendToken);
+    Serial.println(recvToken);
+
     if (pType == 0 && direction == 2 && replyMsg == 1 && recvToken == sendToken)
       success = true;
+  }
+  else{
+    Serial.print("Only ");
+    Serial.print(resLen);
+    Serial.println(" bytes returned for auth message.");
   }
 
   ethClient.stop();
@@ -266,15 +288,23 @@ bool ServerConnector::sendHeartbeat(){
   ethClient.write(hbRequest, 1);
 
   delete hbRequest;
-  hbRequest = NULL;
+
+  // Wait for an ACK so we don't close the connection too early
+  // But don't wait too long for a heartbeat (1/4 the wait of events)
+  unsigned int cycleCount = 0;
+  while (!ethClient.available()){
+    delay(ackDelayCycle);
+    cycleCount++;
+    if (cycleCount >= (ackTimeout / 4)){
+      break;
+    }
+  }  
 
   byte* hbResponse = new byte;
-  byte* iterPtr = hbResponse;
   unsigned int recvLen = 0;
   while(ethClient.connected()){
     if(ethClient.available()){
-      *iterPtr = ethClient.read();
-      iterPtr++;
+      hbResponse[recvLen] = ethClient.read();
       recvLen++;
     }
   }
@@ -282,14 +312,9 @@ bool ServerConnector::sendHeartbeat(){
   ethClient.stop();
   ethClient.flush();
 
-  if (recvLen > 1)
-    Serial.println("More than 1 byte received for heartbeat, this shouldn't happen.");
-
   bool alive = serverAlive(hbResponse);
 
   delete hbResponse;
-  hbResponse = NULL;
-  iterPtr = NULL;
 
   return alive;
 }

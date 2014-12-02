@@ -149,7 +149,7 @@ class EventConsumer(Server):
 			except sock_error as err:
 				if err.errno != errno.ECONNRESET:
 					print("[Event Consumer] An unexpected socket error occured.")
-					print(err.message)
+					print(err)
 				else:
 					print("[Event Consumer] Connection was reset, resuming to allow new connections.")
 					print("[Event Consumer] %i bytes received before reset." % len(event))

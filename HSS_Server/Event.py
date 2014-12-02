@@ -66,9 +66,22 @@ class Event(object):
         self.sensor = sensor
 
 
+    def __getProfileID(self, uid):
+        ret = None
+
+        if uid > 0: # 0 is not a valid user ID
+            with self.psql as cursor:
+                cursor.execute("SELECT id FROM ac3app_userprofile WHERE (user_id = %s)", (uid,))
+                resTup = cursor.fetchone()
+
+                if resTup and resTup[0]:
+                    ret = resTup[0]
+
+        return ret
+
+
     def setUser(self, uid):
-        if uid > 0: # 0 is not a valid userid
-            self.user = uid
+        self.user = self.__getProfileID(uid)
 
 
     def setImage(self, iType, iSize, iPath):

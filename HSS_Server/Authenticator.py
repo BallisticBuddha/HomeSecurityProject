@@ -86,7 +86,7 @@ class Authenticator(Server):
             except sock_error as err:
                 if err.errno != errno.ECONNRESET:
                     print("[Event Consumer] An unexpected socket error occured.")
-                    print(err.message)
+                    print(err)
                 else:
                     print("[Authenticator] Connection was reset, resuming to allow new connections.")
                     print("[Authenticator] Message received before reset: %s" % message)
