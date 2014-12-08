@@ -43,6 +43,7 @@ Basic Info
 The purpose of this system is for the user to place the arduino based device at some ingress/egress point in one's home, with a keypad, camera, and indicator light facing the point of interest. The device is armed and disarmed using a passcode that is set up on the web interface for the backend server. Once a user is set up, they may arm or disarm the device using their userID and passocde. The device gives 15 seconds for the user to input a correct userID/passcode after the attempted arm or disarm has started. Up to 8 PIR sensors are used to detect motion and trigger the alarm when in the armed state
 
 **To arm the device**
+
 1. The device is in the disarmed state (green light)
 2. Press the 'A' key on the keypad
 3. Enter the user's userID
@@ -61,6 +62,7 @@ The purpose of this system is for the user to place the arduino based device at 
 5. The alarm event is logged on the server along with a picture taken at the start of this sequence
 
 **To disarm the device**
+
 1. The device is in the armed state (orange light)
 2. Motion is detected by any one of the sensors (alternativly, press 'D' on the keypad)
 3. The device will wait 15 seconds for the user to input a correct userID/passcode
