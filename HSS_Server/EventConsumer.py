@@ -10,8 +10,10 @@ from Event import Event
 
 class EventConsumer(Server):
 
-	def __init__(self, sAddr='127.0.0.1', sPort=8089, buffSize=1024):
-		Server.__init__(self, sAddr, sPort, buffSize)
+	def __init__(self, config, buffSize=1024):
+		Server.__init__(self, config["eventServer"]["ipAddress"], 
+			config["eventServer"]["port"], buffSize)
+		self.dbConfig = config["dbSettings"]
 		self.running = True
 		self.mediaDir = "media/"
 		if not os.path.isdir(self.mediaDir):
@@ -116,7 +118,7 @@ class EventConsumer(Server):
 					cSock.send(self.getACK(eventType, seqNum))
 					cSock.close()
 
-					e = Event(eventType, timeStarted, timeReceived, seqNum)
+					e = Event(self.dbConfig, eventType, timeStarted, timeReceived, seqNum)
 
 					userID = event[1] >> 8
 					userID = userID | (event[2] & 0x0FF)

@@ -5,8 +5,8 @@ from PSQL import PSQLConn
 
 class Event(object):
 
-    def __init__(self, eType, conStartTime, timeRecvd, seq):
-        self.psql = PSQLConn()
+    def __init__(self, dbConfig, eType, conStartTime, timeRecvd, seq):
+        self.psql = PSQLConn(dbConfig)
 
         self.eventType = eType
         self.started = conStartTime

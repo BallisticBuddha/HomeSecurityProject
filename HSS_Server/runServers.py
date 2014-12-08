@@ -1,12 +1,18 @@
 #!/usr/bin/python3
 
+import yaml
 from threading import Thread
 
 from EventConsumer import EventConsumer
 from Authenticator import Authenticator
 
-authServ = Authenticator(sAddr='192.168.1.49', sPort=8088)
-eventServ = EventConsumer(sAddr='192.168.1.49', sPort=8089)
+def getSettings(configFile):
+	yamlFile = open(configFile, "r")
+	return yaml.load(yamlFile)
+
+config = getSettings("config.yaml")["HSS_Server"]
+authServ = Authenticator(config)
+eventServ = EventConsumer(config)
 
 t1 = Thread(target=authServ.listenForAuth)
 t2 = Thread(target=eventServ.consumeEvents)

@@ -9,10 +9,11 @@ from PSQL import PSQLConn
 
 class Authenticator(Server):
 
-    def __init__(self, sAddr='127.0.0.1', sPort=8088, buffSize=1024):
-        Server.__init__(self, sAddr, sPort, buffSize)
+    def __init__(self, config, buffSize=1024):
+        Server.__init__(self, config["authServer"]["ipAddress"], 
+            config["authServer"]["port"], buffSize)
         self.running = True
-        self.psql = PSQLConn()
+        self.psql = PSQLConn(config["dbSettings"])
         print("Authentication Server started...")
 
 

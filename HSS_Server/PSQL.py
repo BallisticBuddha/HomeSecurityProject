@@ -3,16 +3,16 @@ import sys
 
 class PSQLConn(object):
     
-    def __init__(self, djangoSettings="/var/www/HSS_Site/AC3site", dbConfig="default"):
-        sys.path.append(djangoSettings)
+    def __init__(self, dbSettings):
+        sys.path.append(dbSettings["configDir"])
 
         from settings import DATABASES
 
-        self.dbName = DATABASES[dbConfig]["NAME"]
-        self.username = DATABASES[dbConfig]["USER"]
-        self.passwd = DATABASES[dbConfig]["PASSWORD"]
-        self.host = DATABASES[dbConfig]["HOST"]
-        self.port = DATABASES[dbConfig]["PORT"]
+        self.dbName = DATABASES[dbSettings["configName"]]["NAME"]
+        self.username = DATABASES[dbSettings["configName"]]["USER"]
+        self.passwd = DATABASES[dbSettings["configName"]]["PASSWORD"]
+        self.host = DATABASES[dbSettings["configName"]]["HOST"]
+        self.port = DATABASES[dbSettings["configName"]]["PORT"]
 
 
     def __enter__(self):
