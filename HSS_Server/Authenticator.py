@@ -3,6 +3,7 @@
 import re
 import errno
 from socket import error as sock_error
+from psycopg2 import Error as PSQLErr
 
 from Server import Server
 from PSQL import PSQLConn
@@ -86,7 +87,7 @@ class Authenticator(Server):
                 cSock.close()
             except sock_error as err:
                 if err.errno != errno.ECONNRESET:
-                    print("[Event Consumer] An unexpected socket error occured.")
+                    print("[Authenticator] An unexpected socket error occured.")
                     print(err)
                 else:
                     print("[Authenticator] Connection was reset, resuming to allow new connections.")
@@ -97,12 +98,16 @@ class Authenticator(Server):
         ret = None
 
         if userID > 0:
-            with self.psql as cursor:
-                cursor.execute("SELECT user_id, user_pin FROM ac3app_userprofile WHERE (user_id = %s)", (userID,))
-                resTup = cursor.fetchone()
+            try:
+                with self.psql as cursor:
+                    cursor.execute("SELECT user_id, user_pin FROM ac3app_userprofile WHERE (user_id = %s)", (userID,))
+                    resTup = cursor.fetchone()
 
-                if resTup and resTup[1] == passcode:
-                    ret = resTup[0]
+                    if resTup and resTup[1] == passcode:
+                        ret = resTup[0]
+            except PSQLErr as e:
+                print("[Authenticator] Failed to read from database...")
+                print(e)
 
         return ret
 

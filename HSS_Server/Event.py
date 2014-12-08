@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+from psycopg2 import Error as PSQLErr
+
 from datetime import datetime
 from PSQL import PSQLConn
 
@@ -70,12 +72,16 @@ class Event(object):
         ret = None
 
         if uid > 0: # 0 is not a valid user ID
-            with self.psql as cursor:
-                cursor.execute("SELECT id FROM ac3app_userprofile WHERE (user_id = %s)", (uid,))
-                resTup = cursor.fetchone()
+            try:
+                with self.psql as cursor:
+                    cursor.execute("SELECT id FROM ac3app_userprofile WHERE (user_id = %s)", (uid,))
+                    resTup = cursor.fetchone()
 
-                if resTup and resTup[0]:
-                    ret = resTup[0]
+                    if resTup and resTup[0]:
+                        ret = resTup[0]
+            except PSQLErr as e:
+                print("[Event Consumer] Failed to read from database...")
+                print(e)
 
         return ret
 
@@ -91,8 +97,12 @@ class Event(object):
 
 
     def storeEvent(self):
-        with self.psql as cursor:
-            cursor.execute("INSERT INTO ac3app_event (date_created, time_created, event_type_id, \
-                sensor_triggered_id, user_id_id, event_image) VALUES (%s , %s, %s, %s, %s, %s)", 
-                (self.dateReceived, self.timeReceived, self.eventType, self.sensor, self.user, self.imgPath))
+        try:
+            with self.psql as cursor:
+                cursor.execute("INSERT INTO ac3app_event (date_created, time_created, event_type_id, \
+                    sensor_triggered_id, user_id_id, event_image) VALUES (%s , %s, %s, %s, %s, %s)", 
+                    (self.dateReceived, self.timeReceived, self.eventType, self.sensor, self.user, self.imgPath))
+        except PSQLErr as e:
+            print("[Event Consumer] Failed to insert into database, event not logged...")
+            print(e)
 

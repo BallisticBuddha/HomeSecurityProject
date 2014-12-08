@@ -135,16 +135,9 @@ bool ServerConnector::authenticate(User u){
     int replyMsg = authRes[0] & 0x0F;
 
     // expecting back the same token we sent
-    long recvToken = authRes[1] << 16;
+    long recvToken = (long) authRes[1] << 16;
     recvToken = recvToken | (authRes[2] << 8);
     recvToken = recvToken | authRes[3];
-
-    Serial.println("Auth report");
-    Serial.println(pType);
-    Serial.println(direction);
-    Serial.println(replyMsg);
-    Serial.println(sendToken);
-    Serial.println(recvToken);
 
     if (pType == 0 && direction == 2 && replyMsg == 1 && recvToken == sendToken)
       success = true;
@@ -238,10 +231,8 @@ bool ServerConnector::sendEvent(byte* arr, int len, Adafruit_VC0706 cam){
     ackNum = (eventACK[6] << 8) | ackNum;
     ackNum = eventACK[7] | ackNum;
 
-    if (pType == 3 && eType == (arr[0] & 0x30) >> 4 && ackNum == seqNum){
+    if (pType == 3 && eType == (arr[0] & 0x30) >> 4 && ackNum == seqNum)
       acked = true;
-      Serial.println("ACK received");
-    }
     else if (cycleCount >= ackTimeout){
       Serial.print("Connection timed out after ");
       Serial.print((ackTimeout * ackDelayCycle) / 1000);
