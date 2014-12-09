@@ -3,8 +3,8 @@
 #include <Adafruit_VC0706.h>
 
 struct User{
-  String userID;
-  String passcode;
+  unsigned int userID;
+  unsigned int passcode;
 };
 
 class ServerConnector{
@@ -23,7 +23,7 @@ class ServerConnector{
   
   public:
     ServerConnector(EthernetClient eClient, byte *server, int aPort, int ePort);
-    int authenticate(User u);
+    bool authenticate(User u);
     bool sendEvent(byte *arr, int len, Adafruit_VC0706 cam);
     bool sendHeartbeat();
       

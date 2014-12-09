@@ -1,26 +1,27 @@
 <!DOCTYPE html>
+
 <html>
 <head lang="en">
     <title>AC3 Main View</title>
-      <link rel="SHORTCUT ICON" href="../../static/ac3app/images/AC3-logo.ico">
-	  <link rel="stylesheet" type="text/css" href="../../static/ac3app/stylesheets/MainView.css">
-      <script src="../../static/ac3app/jqplot/jquery.min.js"></script>
-      <script src="../../static/ac3app/scripts/jquery-2.1.1.min.js"></script>
-	  <script src="../../static/ac3app/jqplot/jquery.jqplot.min.js"></script>
-      <script src="../../static/ac3app/jqplot/jqplot.pieRenderer.min.js"></script>
-      <link href="../../static/ac3app/jqplot/jquery.jqplot.min.css" type="text/css" rel="stylesheet"/>
-	  <link rel="stylesheet" href="../../static/ac3app/ui/jquery-ui.css">
+      <link rel="SHORTCUT ICON" href="{{ STATIC_URL }}ac3app/images/AC3-logo.ico">
+	  <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}ac3app/stylesheets/MainView.css">
+      <script src="{{ STATIC_URL }}ac3app/jqplot/jquery.min.js"></script>
+      <script src="{{ STATIC_URL }}ac3app/scripts/jquery-2.1.1.min.js"></script>
+	  <script src="{{ STATIC_URL }}ac3app/jqplot/jquery.jqplot.min.js"></script>
+      <script src="{{ STATIC_URL }}ac3app/jqplot/jqplot.pieRenderer.min.js"></script>
+      <link href="{{ STATIC_URL }}ac3app/jqplot/jquery.jqplot.min.css{{ STATIC_URL }}" type="text/css" rel="stylesheet"/>
+	  <link rel="stylesheet" href="{{ STATIC_URL }}ac3app/ui/jquery-ui.css">
 	  <!--<script src="../../static/ac3app/ui/jquery-1.10.2.js"></script>-->
-	  <script src="../../static/ac3app/ui/jquery-ui.js"></script>
+	  <script src="{{ STATIC_URL }}ac3app/ui/jquery-ui.js"></script>
 	  <!--<link rel="stylesheet" href="../../static/ac3app/ui/style.css">-->
-      <script type="text/javascript" src="../../static/ac3app/scripts/MainView.js"></script>
+      <script type="text/javascript" src="{{ STATIC_URL }}ac3app/scripts/MainView.js"></script>
 </head>
 
 <body bgcolor='#3488C4'>
 <form id="filter_form" action="return False">
 <table class="header" width="100%">
 <tr>
-<td><img src="../../static/ac3app/images/AC3-logo.png" align="left" style="width:100px;height:100px"></td>
+<td><img src="{{ STATIC_URL }}ac3app/images/AC3-logo.png" align="left" style="width:100px;height:100px"></td>
     {% if user.is_authenticated %}
         <td align="center"><font size="8"><bold>Welcome <label>{{ user.username }}</label></bold></font></td>
     {% else %}
@@ -74,9 +75,9 @@
 <caption><font size="5" color="blue"><bold>Filter Events</bold></font></caption><br>
     {% csrf_token %}
 UserName: {{ form.user_choices }}<br>
-Date1: <img src="../../static/ac3app/images/calendar.ico" style="width:30px;height:30px;vertical-align: text-bottom">{{ form.date1 }}
+Date1: <img src="{{ STATIC_URL }}ac3app/images/calendar.ico" style="width:30px;height:30px;vertical-align: text-bottom">{{ form.date1 }}
 <label style="margin-left:25px;margin-right:25px">To</label>	
-Date2: <img src="../../static/ac3app/images/calendar.ico" style="width:30px;height:30px;vertical-align: text-bottom">{{ form.date2 }}<br>
+Date2: <img src="{{ STATIC_URL }}ac3app/images/calendar.ico" style="width:30px;height:30px;vertical-align: text-bottom">{{ form.date2 }}<br>
 <label id="Sensor">Triggered Sensor:</label>{{ form.sensor_choices }}
 <label style="margin-left:25px" for="Sensor">Event Type:</label>{{ form.event_choices }}
 <br>

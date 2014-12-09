@@ -3,8 +3,7 @@
 Event::Event(EventType type, long seq){
   eventType = type;
   seqNum = seq;
-  userID[0] = 0;
-  userID[1] = 0;
+  userID = 0;
   sensorIDs = new byte;
   *sensorIDs = 0;
   picSize = 0;
@@ -15,20 +14,8 @@ void Event::setType(EventType et){
   eventType = et;
 }
 
-void Event::setUser(String uid){
-
-  if (uid.length() >= 2){
-    userID[0] = uid[0];
-    userID[1] = uid[1];
-  }
-  else if (uid.length() == 1){
-    userID[0] = 0;
-    userID[1] = uid[0];
-  }
-  else{
-    userID[0] = 0;
-    userID[1] = 0; 
-  }
+void Event::setUser(unsigned int uid){
+  userID = uid;
 }
 
 void Event::setSensors(bool sensors[8]){
@@ -104,8 +91,7 @@ byte* Event::getBytes(){
 
   // next 2 are event type
   byte eType = Event::typeNumber();
-  eType = eType << 4;
-  data[0] = data[0] | eType;
+  data[0] = data[0] | (eType << 4);
 
   // next 4 are for the picture type (0 for no picture, 1 for a JPEG)
   byte pType;
@@ -116,8 +102,8 @@ byte* Event::getBytes(){
   data[0] = data[0] | pType;
 
   // next 2 bytes represent the userID
-  data[1] = userID[0];
-  data[2] = userID[1];
+  data[1] = userID >> 8;
+  data[2] = userID & 0xFF;
 
   // next byte is for the sensor IDs
   data[3] = *sensorIDs;

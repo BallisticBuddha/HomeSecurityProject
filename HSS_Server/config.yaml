@@ -1,0 +1,10 @@
+HSS_Server:
+    dbSettings:
+        configDir: "/var/www/HSS_Site/AC3site"
+        configName: "default"
+    authServer:
+        ipAddress: "192.168.1.49"
+        port: 8088
+    eventServer:
+        ipAddress: "192.168.1.49"
+        port: 8089

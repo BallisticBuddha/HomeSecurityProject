@@ -1,66 +1,132 @@
 #!/usr/bin/python3
 
 import re
+import errno
+from socket import error as sock_error
+from psycopg2 import Error as PSQLErr
+
 from Server import Server
+from PSQL import PSQLConn
 
 class Authenticator(Server):
 
-	def __init__(self, sAddr='127.0.0.1', sPort=8088, buffSize=1024):
-		Server.__init__(self, sAddr, sPort, buffSize)
-		self.users = self.setUsers()
-		self.running = True
-		print("Authentication Server started...")
+    def __init__(self, config, buffSize=1024):
+        Server.__init__(self, config["authServer"]["ipAddress"], 
+            config["authServer"]["port"], buffSize)
+        self.running = True
+        self.psql = PSQLConn(config["dbSettings"])
+        print("Authentication Server started...")
 
 
-	def listenForAuth(self):
-		while self.running:
-			self.sock.listen(0)
-			cSock, cAddr = self.sock.accept()
-			print("[Authenticator] Accepted connection from %s." % str(cAddr))
-			connAlive = True
-			message = ""
+    def getAuthResponse(self, success, token):
+        resPkt = []
 
-			try:
-				while connAlive:
-					data = cSock.recv(self.buffSize)
+        resPkt.append(0) # Auth Packet
+        resPkt[0] = resPkt[0] | 2 << 4 # Response
+        if success:
+            resPkt[0] = resPkt[0] | 1
+        resPkt.append(token >> 16)
+        resPkt.append((token >> 8) & 0xFF)
+        resPkt.append(token & 0xFF)
 
-					message += data.decode()
-
-					if data.decode() == '\n' or len(data) == 0:
-						connAlive = False
-
-				msgre = re.search("uid:([0-9]*),pass:([0-9]*)", message)
-				if not msgre or len(msgre.groups()) < 2:
-					print("[Authenticator] malformed authentication request received: \n%s" % message)
-				else:
-					user = msgre.group(1)
-					passcode = msgre.group(2)
-					userTup = (user, passcode)
-					if userTup in self.users:
-						print("[Authenticator] User %s successfully authenticated." % user)
-						cSock.send("success".encode())
-					else:
-						print("[Authenticator] Failed to authenticate user %s." % user)
-						cSock.send("fail".encode())
-
-				cSock.close()
-			except ConnectionResetError as e:
-				print("[Authenticator] Connection was reset, resuming to allow new connections.")
-				print("[Authenticator] Message received before reset: %s" % message)
+        return bytes(resPkt)
 
 
-	def setUsers(self):
-		u1 = ("5","1234")
-		u2 = ("08","8888")
-		u3 = ("8", "987")
+    def listenForAuth(self):
+        while self.running:
+            self.sock.listen(0)
+            cSock, cAddr = self.sock.accept()
+            print("[Authenticator] Accepted connection from %s." % str(cAddr))
+            connAlive = True
+            authPkt = []
 
-		#TODO: populate these (userid,passcode) tuples from the database
-		users = [u1, u2, u3]
+            try:
+                while connAlive:
+                    data = cSock.recv(self.buffSize)
 
-		return users
+                    authPkt.extend(data)
+
+                    if (authPkt[0] >> 6) == 0: # Authentication packet
+                        if (authPkt[0] >> 4) & 0x30 == 1: # Auth request
+                            if len(authPkt >= 8):
+                                connAlive = False
+                        else:
+                            connAlive = False
+                    else:
+                        connAlive = False
+
+                pktType = authPkt[0] >> 6
+                direction = (authPkt[0] >> 4) & 0x0F
+                message = authPkt[0] & 0x0F
+
+                if pktType == 0 and len(authPkt) >= 8:
+                    token = authPkt[1] << 16
+                    token = token | (authPkt[2] << 8)
+                    token = token | authPkt[3]
+
+                    if direction == 1: 
+                        user = authPkt[4] << 8
+                        user = user | authPkt[5]
+
+                        passcode = authPkt[6] << 8
+                        passcode = passcode | authPkt[7]
+
+                        result = self.authorized(user, passcode)
+                        response = self.getAuthResponse(result, token)
+                        cSock.send(response)
+                        if result: 
+                           print("[Authenticator] %s was successfully authenticated." % self.getUsername(result))
+                        else:
+                            print("[Authenticator] Failed to authenticate user with ID %s." % user)
+                    else:
+                        print("[Authenticator] Recieved response packet.")
+                else:
+                    print("[Authenticator] message too small or of wrong type.")
+
+
+                cSock.close()
+            except sock_error as err:
+                if err.errno != errno.ECONNRESET:
+                    print("[Authenticator] An unexpected socket error occured.")
+                    print(err)
+                else:
+                    print("[Authenticator] Connection was reset, resuming to allow new connections.")
+                    print("[Authenticator] Message received before reset: %s" % message)
+
+
+    def authorized(self, userID, passcode):
+        ret = None
+
+        if userID > 0:
+            try:
+                with self.psql as cursor:
+                    cursor.execute("SELECT user_id, user_pin FROM ac3app_userprofile WHERE (user_id = %s)", (userID,))
+                    resTup = cursor.fetchone()
+
+                    if resTup and resTup[1] == passcode:
+                        ret = resTup[0]
+            except PSQLErr as e:
+                print("[Authenticator] Failed to read from database...")
+                print(e)
+
+        return ret
+
+
+    def getUsername(self, userID):
+        ret = None
+
+        userID = userID
+        with self.psql as cursor:
+            cursor.execute("SELECT username FROM auth_user WHERE (id = %s)", (userID,))
+            resTup = cursor.fetchone()
+
+            if resTup and resTup[0]:
+                ret = resTup[0]
+
+        return ret
 
 
 if __name__ == "__main__":
-	auth = Authenticator(sAddr="192.168.1.106")
+    auth = Authenticator(sAddr="192.168.1.49")
 
-	auth.listenForAuth()
+    auth.listenForAuth()

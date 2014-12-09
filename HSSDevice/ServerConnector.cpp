@@ -72,44 +72,89 @@ bool ServerConnector::serverAlive(byte *hb){
   return ret;
 }
 
-int ServerConnector::authenticate(User u){
+bool ServerConnector::authenticate(User u){
   int res = connectToAuth();
 
   if (!res){
     return res;
   }
 
-  if (sizeof(u.userID) > 2){
-    u.userID = u.userID.substring(0,2);
+  byte* authReq = new byte[8];
+
+  // The first two bits are for the packet type (0 for authentication)
+
+  // The next two bits indicate the direction (1 for request, 2 for response)
+  authReq[0] = 1 << 4;
+
+  // The next 4 bits are padding for the request, but represent the response message on the reply
+
+  // The next 3 bytes are a randomly generated token
+  long sendToken = random(0, 0xFFFFFF);
+  authReq[1] = sendToken >> 16;
+  authReq[2] = (sendToken >> 8) & 0xFF;
+  authReq[3] = sendToken & 0xFF;
+
+  // The next 2 bytes represent the userID entered on the keypad (request only)
+  authReq[4] = u.userID >> 8;
+  authReq[5] = u.userID & 0xFF;
+
+  // The last 2 bytes represent the passcode entered on the keypad (request only)
+  authReq[6] = u.passcode >> 8;
+  authReq[7] = u.passcode & 0xFF;
+
+  ethClient.write(authReq, 8);
+
+  delete authReq;
+
+  // Wait for an ACK so we don't close the connection too early
+  unsigned int cycleCount = 0;
+  while (!ethClient.available()){
+    delay(ackDelayCycle);
+    cycleCount++;
+    if (cycleCount >= (ackTimeout / 4)){
+      break;
+    }
+  } 
+
+  // Now we get the response
+  bool success = false;
+  byte* authRes = new byte[4];
+  unsigned int resLen = 0;
+  while (ethClient.connected() && resLen < 4){
+    if (ethClient.available()){
+      authRes[resLen] = ethClient.read();
+      resLen++;
+    }
   }
 
-  String toSend = "uid:";
-  toSend += u.userID;
-  toSend += ",pass:";
-  toSend += u.passcode;
+  if (resLen >=4){
+    int pType = authRes[0] >> 6;
+    int direction = (authRes[0] >> 4) & 0x0F;
 
-  ethClient.println(toSend);
+    // response message: 1 indicates a success, 0 is a failed authentication
+    int replyMsg = authRes[0] & 0x0F;
 
-  String recvMsg = "";
-  while (ethClient.connected()){
-    if (ethClient.available()){
-      char cRecv = ethClient.read();
-      if (cRecv >= 0){
-        recvMsg += cRecv;
-      }
-    }
+    // expecting back the same token we sent
+    long recvToken = (long) authRes[1] << 16;
+    recvToken = recvToken | (authRes[2] << 8);
+    recvToken = recvToken | authRes[3];
+
+    if (pType == 0 && direction == 2 && replyMsg == 1 && recvToken == sendToken)
+      success = true;
+  }
+  else{
+    Serial.print("Only ");
+    Serial.print(resLen);
+    Serial.println(" bytes returned for auth message.");
   }
 
   ethClient.stop();
   ethClient.flush();
   Serial.println("Disconnected from authentication server.");
 
-  if (recvMsg == "success"){
-    return 1;
-  }
-  else{
-    return 0;
-  }
+  delete authRes;
+
+  return success;
 }
 
 bool ServerConnector::sendEvent(byte* arr, int len, Adafruit_VC0706 cam){
@@ -157,47 +202,44 @@ bool ServerConnector::sendEvent(byte* arr, int len, Adafruit_VC0706 cam){
   while (!ethClient.available()){
     delay(ackDelayCycle);
     cycleCount++;
-
     if (cycleCount >= ackTimeout){
       break;
     }
   }
 
-  Serial.println(cycleCount);
-
   bool acked = false;
-  byte* eventACK = new byte;
-  byte* iterPtr = eventACK;
+  byte* eventACK = new byte[8];
   unsigned int recvLen = 0;
-  while(ethClient.connected()){
+  while(ethClient.connected() && recvLen < 8){
     if(ethClient.available()){
-      *iterPtr = ethClient.read();
-      iterPtr++;
+      eventACK[recvLen] = ethClient.read();
       recvLen++;
     }
   }
 
-  // The first 2 bits are the packet type (3 for event ACK)
-  int pType = eventACK[0] >> 6;
-  // The next 2 bits represent the type of event that was acked
-  int eType = (eventACK[0] & 0x30) >> 4;
+  if (recvLen >=4){
+    // The first 2 bits are the packet type (3 for event ACK)
+    int pType = eventACK[0] >> 6;
+    // The next 2 bits represent the type of event that was acked
+    int eType = (eventACK[0] & 0x30) >> 4;
 
-  // The next 28 bits are padding
+    // The next 28 bits are padding
 
-  // The next 4 bytes are the sequence number that this is acking
-  long ackNum = eventACK[4] << 24;
-  ackNum = (eventACK[5] << 16) | ackNum;
-  ackNum = (eventACK[6] << 8) | ackNum;
-  ackNum = eventACK[7] | ackNum;
+    // The next 4 bytes are the sequence number that this is acking
+    long ackNum = eventACK[4] << 24;
+    ackNum = (eventACK[5] << 16) | ackNum;
+    ackNum = (eventACK[6] << 8) | ackNum;
+    ackNum = eventACK[7] | ackNum;
 
-  if (pType == 3 && eType == (arr[0] & 0x30) >> 4 && ackNum == seqNum)
-    acked = true;
-  else if (cycleCount >= ackTimeout){
-    Serial.print("Connection timed out after ");
-    Serial.print((ackTimeout * ackDelayCycle) / 1000);
-    Serial.println(" seconds.");
+    if (pType == 3 && eType == (arr[0] & 0x30) >> 4 && ackNum == seqNum)
+      acked = true;
+    else if (cycleCount >= ackTimeout){
+      Serial.print("Connection timed out after ");
+      Serial.print((ackTimeout * ackDelayCycle) / 1000);
+      Serial.println(" seconds.");
+    }
   }
-  else{
+  if (!acked){
     Serial.println("Event was not acked before the server closed the connection.");
     Serial.println("Bytes received:");
     for (int i=0; i < recvLen; i++){
@@ -210,6 +252,8 @@ bool ServerConnector::sendEvent(byte* arr, int len, Adafruit_VC0706 cam){
   ethClient.stop();
   ethClient.flush();
   Serial.println("Disconnected from event consumer server.");
+
+  delete eventACK;
   
   return acked;
 
@@ -235,15 +279,23 @@ bool ServerConnector::sendHeartbeat(){
   ethClient.write(hbRequest, 1);
 
   delete hbRequest;
-  hbRequest = NULL;
+
+  // Wait for an ACK so we don't close the connection too early
+  // But don't wait too long for a heartbeat (1/4 the wait of events)
+  unsigned int cycleCount = 0;
+  while (!ethClient.available()){
+    delay(ackDelayCycle);
+    cycleCount++;
+    if (cycleCount >= (ackTimeout / 4)){
+      break;
+    }
+  }  
 
   byte* hbResponse = new byte;
-  byte* iterPtr = hbResponse;
   unsigned int recvLen = 0;
   while(ethClient.connected()){
     if(ethClient.available()){
-      *iterPtr = ethClient.read();
-      iterPtr++;
+      hbResponse[recvLen] = ethClient.read();
       recvLen++;
     }
   }
@@ -251,14 +303,9 @@ bool ServerConnector::sendHeartbeat(){
   ethClient.stop();
   ethClient.flush();
 
-  if (recvLen > 1)
-    Serial.println("More than 1 byte received for heartbeat, this shouldn't happen.");
-
   bool alive = serverAlive(hbResponse);
 
   delete hbResponse;
-  hbResponse = NULL;
-  iterPtr = NULL;
 
   return alive;
 }

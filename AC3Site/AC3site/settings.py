@@ -90,9 +90,9 @@ STATIC_URL = '/static/'
 
 # Media files that will be uploaded from events
 
-MEDIA_ROOT = 'add your path'
+MEDIA_ROOT = '/opt/HSS_Server/media/'
 
-MEDIA_URL = "http://localhost:8000/ac3app/media/"
+MEDIA_URL = "/ac3app/media/"
 
 # Setting up email settings to send notifications
 
