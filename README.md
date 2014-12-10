@@ -5,6 +5,37 @@ This is an Arduino based Home Secirity System that logs events that occur in one
 
 The system contains two pieces, the Arduino controlled device, and a backed server which can run on any hardware of your choosing that can run Linux and the software stack we chose to build on top of the OS. During the development of this project, we used a RasberryPi as our backend server, but any network enabled hardware should work.
 
+Basic Info
+----------
+The purpose of this system is for the user to place the arduino based device at some ingress/egress point in one's home, with a keypad, camera, and indicator light facing the point of interest. The device is armed and disarmed using a passcode that is set up on the web interface for the backend server. Once a user is set up, they may arm or disarm the device using their userID and passocde. The device gives 15 seconds for the user to input a correct userID/passcode after the attempted arm or disarm has started. Up to 8 PIR sensors are used to detect motion and trigger the alarm when in the armed state
+
+**To arm the device**
+
+1. The device is in the disarmed state (green light)
+2. Press the 'A' key on the keypad
+3. Enter the user's userID
+4. Press the '\*' key
+5. Enter the user's passcode
+6. Press the '\#' key
+7. The light should start flashing yellow, in 15 seconds the device will be armed
+8. The arm event is logged on the server along with a picture taken at the start of this sequence
+
+**Triggering the alarm**
+
+1. The device is in the armed state (orange light)
+2. Motion is detected by any one of the sensors
+3. The device will wait 15 seconds for the user to input a correct userID/passcode
+4. If a valid userID & passcode is not entered in time, the device will go into the alarmed state (flashing red light)
+5. The alarm event is logged on the server along with a picture taken at the start of this sequence
+
+**To disarm the device**
+
+1. The device is in the armed state (orange light)
+2. Motion is detected by any one of the sensors (alternativly, press 'D' on the keypad)
+3. The device will wait 15 seconds for the user to input a correct userID/passcode
+4. If a valid userID & passcode is entered in time, the device will go into the disarmed state (green light)
+5. The disarm event is logged on the server along with a picture taken at the start of this sequence
+
 System Components
 -----------------
 **Mounted Unit**
@@ -38,37 +69,8 @@ System Components
     * Mounted Unit: 192.168.1.48
     * Backend Server: 192.168.1.49
 
-Basic Info
+Disclaimer
 ----------
-The purpose of this system is for the user to place the arduino based device at some ingress/egress point in one's home, with a keypad, camera, and indicator light facing the point of interest. The device is armed and disarmed using a passcode that is set up on the web interface for the backend server. Once a user is set up, they may arm or disarm the device using their userID and passocde. The device gives 15 seconds for the user to input a correct userID/passcode after the attempted arm or disarm has started. Up to 8 PIR sensors are used to detect motion and trigger the alarm when in the armed state
-
-**To arm the device**
-
-1. The device is in the disarmed state (green light)
-2. Press the 'A' key on the keypad
-3. Enter the user's userID
-4. Press the '\*' key
-5. Enter the user's passcode
-6. Press the '\#' key
-7. The light should start flashing yellow, in 15 seconds the device will be armed
-8. The arm event is logged on the server along with a picture taken at the start of this sequence
-
-**Triggering the alarm**
-
-1. The device is in the armed state (orange light)
-2. Motion is detected by any one of the sensors
-3. The device will wait 15 seconds for the user to input a correct userID/passcode
-4. If a valid userID & passcode is not entered in time, the device will go into the alarmed state (flashing red light)
-5. The alarm event is logged on the server along with a picture taken at the start of this sequence
-
-**To disarm the device**
-
-1. The device is in the armed state (orange light)
-2. Motion is detected by any one of the sensors (alternativly, press 'D' on the keypad)
-3. The device will wait 15 seconds for the user to input a correct userID/passcode
-4. If a valid userID & passcode is entered in time, the device will go into the disarmed state (green light)
-5. The disarm event is logged on the server along with a picture taken at the start of this sequence
-
 This was made for academic purposes only, and is not intended to be the only point of security in one's home. There are still bugs, and things may go wrong. Additionally, all communications between the device and the server are unencrypted, meaning that userIDs and passcodes can be intercepted by a MITM attack if run on an unsecure network.
 
 We are not liable for any incidents caused by, or not detected by this system, and do not expect users of this system to rely on this as a comprehensive home security system.
